@@ -6,24 +6,7 @@ import { useEffect, useState } from "react";
 import { useLang } from "@/components/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import BottomNav from "@/components/BottomNav";
-import IndonesiaMap from "@/components/IndonesiaMap";
 import { t, tr } from "@/lib/i18n";
-
-// Mock live data — replace with Supabase Realtime
-const MOCK_PROVINCE_COUNTS: Record<string, number> = {
-  Aceh: 312,
-  "Sumatera Utara": 187,
-  "Jawa Barat": 523,
-  "DKI Jakarta": 445,
-  "Jawa Tengah": 298,
-  "Jawa Timur": 401,
-  Bali: 156,
-  Sulawesi: 89,
-  "Kalimantan Barat": 67,
-  "Sulawesi Selatan": 143,
-  Maluku: 34,
-  Papua: 28,
-};
 
 const FEATURED_UPG = {
   nameId: "Orang Aceh",
@@ -36,82 +19,89 @@ const FEATURED_UPG = {
 
 export default function LandingPage() {
   const { lang } = useLang();
-  const [totalPraying, setTotalPraying] = useState(1247);
-  const [activeProvinces, setActiveProvinces] = useState(22);
+  const [todayCount, setTodayCount] = useState(1247);
+  const thirtyDayCount = 38640; // mock — replace with Supabase query
 
-  // Simulate live counter
+  // Simulate live counter ticking up
   useEffect(() => {
     const interval = setInterval(() => {
-      setTotalPraying((n) => n + Math.floor(Math.random() * 3));
+      setTodayCount((n) => n + Math.floor(Math.random() * 3));
     }, 8000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Hero — navy, full height on mobile */}
+      {/* Hero */}
       <section className="relative bg-[var(--color-navy-deep)] min-h-[100svh] flex flex-col overflow-hidden">
-        {/* Subtle radial gradient */}
+        {/* Prayer map IDEOGRAM background */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: "url('/prayer-map.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center 40%",
+            opacity: 0.40,
+          }}
+        />
+        {/* Gradient overlay — readable bottom */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 80% 60% at 50% 80%, oklch(30% 0.10 258 / 0.5) 0%, transparent 70%)",
+              "linear-gradient(to bottom, oklch(14% 0.07 258 / 0.55) 0%, oklch(14% 0.07 258 / 0.25) 35%, oklch(14% 0.07 258 / 0.88) 100%)",
           }}
         />
 
         {/* Top bar */}
         <div className="relative z-10 flex items-center justify-between px-5 pt-safe pt-4 pb-2">
+          {/* Doa Sejati logo — water drip / ripple mark */}
           <Image
-            src="/icons/logo-white.png"
-            alt="JATI"
-            width={40}
-            height={40}
-            className="opacity-60"
+            src="/icons/logo-ds.jpg"
+            alt="Doa Sejati"
+            width={38}
+            height={38}
+            className="rounded-xl opacity-95 object-cover"
           />
           <LanguageToggle variant="white" />
         </div>
 
-        {/* Map area */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pt-4">
-          <IndonesiaMap
-            provinceCounts={MOCK_PROVINCE_COUNTS}
-            totalPraying={totalPraying}
-            className="w-full max-w-md"
-          />
+        {/* Spacer — pushes content to bottom */}
+        <div className="flex-1" />
 
-          {/* Live stats strip */}
-          <div className="flex items-center gap-6 mt-3">
+        {/* Hero content — pinned bottom */}
+        <div className="relative z-10 px-5 pb-8 pt-4 text-center">
+          {/* Live stats */}
+          <div className="flex items-center justify-center gap-6 mb-6">
             <div className="text-center">
-              <div className="text-xl font-bold text-white font-display">
-                {totalPraying.toLocaleString("id")}
+              <div className="text-2xl font-bold text-white font-display">
+                {todayCount.toLocaleString("id")}
               </div>
-              <div className="text-[10px] text-white/50 uppercase tracking-widest">
-                {tr(t.landing.prayingNow, lang)}
+              <div className="text-[10px] text-white/55 uppercase tracking-widest">
+                {lang === "id" ? "berdoa hari ini" : "praying today"}
               </div>
             </div>
             <div className="w-px h-8 bg-white/20" />
             <div className="text-center">
-              <div className="text-xl font-bold text-white font-display">
-                {activeProvinces}
+              <div className="text-2xl font-bold text-white font-display">
+                {thirtyDayCount.toLocaleString("id")}
               </div>
-              <div className="text-[10px] text-white/50 uppercase tracking-widest">
-                {tr(t.landing.provinces, lang)}
+              <div className="text-[10px] text-white/55 uppercase tracking-widest">
+                {lang === "id" ? "berdoa 30 hari terakhir" : "prayed last 30 days"}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Hero content — bottom */}
-        <div className="relative z-10 px-5 pb-8 pt-4 text-center">
           <h1 className="font-display text-5xl font-bold text-white tracking-tight mb-2">
             Doa Sejati
           </h1>
           <p className="text-white/70 text-sm font-medium tracking-wider uppercase mb-6">
-            {tr(t.landing.tagline, lang)}
+            {lang === "id"
+              ? "Gerakan Doa untuk Indonesia"
+              : "A Prayer Movement for Indonesia"}
           </p>
 
-          {/* CTA buttons */}
+          {/* CTAs */}
           <div className="flex flex-col gap-3 max-w-xs mx-auto">
             <Link
               href="/today"
@@ -123,7 +113,7 @@ export default function LandingPage() {
               href="/signup"
               className="block w-full py-3 rounded-2xl font-semibold text-white/80 text-sm border border-white/20 active:bg-white/10 transition-colors"
             >
-              {tr(t.landing.seeToday, lang)}
+              {lang === "id" ? "Bergabung dengan gerakan →" : "Join the movement →"}
             </Link>
           </div>
         </div>
@@ -163,7 +153,7 @@ export default function LandingPage() {
               <div className="flex items-center justify-between">
                 <div className="text-white/60 text-xs">
                   {FEATURED_UPG.prayerCountToday.toLocaleString("id")}{" "}
-                  {tr(t.prayer.prayingToday, lang)}
+                  {lang === "id" ? "berdoa hari ini" : "praying today"}
                 </div>
                 <span className="text-white text-sm font-semibold">
                   {lang === "id" ? "Berdoa →" : "Pray →"}
@@ -173,11 +163,20 @@ export default function LandingPage() {
           </div>
         </Link>
 
-        {/* About movement */}
+        {/* About the movement */}
         <div className="mt-8 pt-8 border-t border-[var(--color-border)]">
-          <h3 className="font-display text-xl font-bold text-[var(--color-navy)] mb-3">
-            {tr(t.landing.aboutMovement, lang)}
-          </h3>
+          <div className="flex items-center gap-4 mb-4">
+            <Image
+              src="/icons/logo-ds.jpg"
+              alt="Satu doa, lingkaran yang meluas"
+              width={56}
+              height={56}
+              className="rounded-xl object-cover flex-shrink-0"
+            />
+            <h3 className="font-display text-xl font-bold text-[var(--color-navy)]">
+              {tr(t.landing.aboutMovement, lang)}
+            </h3>
+          </div>
           <p className="text-[var(--color-muted)] text-sm leading-relaxed whitespace-pre-line">
             {tr(t.landing.mission, lang)}
           </p>

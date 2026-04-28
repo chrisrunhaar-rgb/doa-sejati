@@ -12,6 +12,7 @@ type Step = 1 | 2 | 3 | 4 | 5;
 
 interface FormData {
   language: Lang;
+  name: string;
   email: string;
   notifTime: "07:00" | "12:00" | "20:00" | string;
   consent: boolean;
@@ -23,6 +24,7 @@ export default function SignupPage() {
   const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState<FormData>({
     language: "id",
+    name: "",
     email: "",
     notifTime: "07:00",
     consent: false,
@@ -30,7 +32,7 @@ export default function SignupPage() {
   const [notifGranted, setNotifGranted] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
   const [installed, setInstalled] = useState(false);
-  const emailRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
 
   // Capture PWA install prompt
   useEffect(() => {
@@ -48,8 +50,8 @@ export default function SignupPage() {
     setStep(2);
   };
 
-  const handleEmailStep = (skip = false) => {
-    if (!skip && form.email && !form.email.includes("@")) return;
+  const handleNameStep = () => {
+    if (!form.name.trim()) return; // name is required
     setStep(3);
   };
 
@@ -140,11 +142,11 @@ export default function SignupPage() {
       <div className="flex justify-center py-6">
         <div className="text-center">
           <Image
-            src="/icons/logo-white.png"
+            src="/icons/logo-ds.jpg"
             alt="Doa Sejati"
             width={60}
             height={60}
-            className="mx-auto mb-3 opacity-90"
+            className="mx-auto mb-3 rounded-xl object-cover"
           />
           <h1 className="font-display text-2xl font-bold text-white">
             Doa Sejati
@@ -190,32 +192,44 @@ export default function SignupPage() {
         {step === 2 && (
           <div className="animate-float-in">
             <h2 className="font-display text-2xl font-bold text-white mb-2">
-              {tr(t.signup.emailStep, lang)}
+              {lang === "id" ? "Siapa namamu?" : "What's your name?"}
             </h2>
             <p className="text-white/60 text-sm mb-6">
-              {tr(t.signup.emailHint, lang)}
+              {lang === "id"
+                ? "Nama kamu akan muncul di streak dan tim doa kamu."
+                : "Your name will appear in your streak and prayer teams."}
             </p>
 
             <input
-              ref={emailRef}
+              ref={nameRef}
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              placeholder={lang === "id" ? "Nama kamu" : "Your name"}
+              autoComplete="given-name"
+              className="w-full px-4 py-3.5 rounded-xl bg-white/10 border border-white/15 text-white placeholder-white/30 focus:outline-none focus:border-white/40 mb-3"
+            />
+
+            <input
               type="email"
               value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              placeholder="email@contoh.com"
-              className="w-full px-4 py-3.5 rounded-xl bg-white/10 border border-white/15 text-white placeholder-white/30 focus:outline-none focus:border-white/40 mb-4"
+              placeholder={lang === "id" ? "Email (opsional)" : "Email (optional)"}
+              autoComplete="email"
+              className="w-full px-4 py-3.5 rounded-xl bg-white/10 border border-white/15 text-white placeholder-white/30 focus:outline-none focus:border-white/40 mb-1"
             />
+            <p className="text-white/35 text-xs mb-5 px-1">
+              {lang === "id"
+                ? "Untuk rekap doa bulanan. Bisa ditambahkan nanti."
+                : "For monthly prayer recaps. Can be added later."}
+            </p>
 
             <button
-              onClick={() => handleEmailStep(false)}
-              className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)] mb-3"
+              onClick={handleNameStep}
+              disabled={!form.name.trim()}
+              className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)] disabled:opacity-40 transition-opacity"
             >
               {tr(t.signup.continueBtn, lang)}
-            </button>
-            <button
-              onClick={() => handleEmailStep(true)}
-              className="w-full py-3 text-white/50 text-sm"
-            >
-              {tr(t.signup.skipEmail, lang)}
             </button>
           </div>
         )}

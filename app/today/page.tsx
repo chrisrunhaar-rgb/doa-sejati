@@ -44,12 +44,13 @@ const PRAYER_DATA = {
 };
 
 const GRADIENT =
-  "linear-gradient(160deg, oklch(18% 0.09 258) 0%, oklch(28% 0.12 240) 50%, oklch(22% 0.08 270) 100%)";
+  "linear-gradient(170deg, oklch(16% 0.08 258 / 0.95) 0%, oklch(20% 0.09 248 / 0.85) 100%)";
 
 export default function TodayPage() {
   const { lang } = useLang();
   const [showShare, setShowShare] = useState(false);
   const [prayerCount, setPrayerCount] = useState(PRAYER_DATA.prayerCountToday);
+  const thirtyDayCount = 38640; // mock — replace with Supabase query
   const [streakDays, setStreakDays] = useState(PRAYER_DATA.streakDays);
   const [hasPrayed, setHasPrayed] = useState(false);
 
@@ -72,10 +73,20 @@ export default function TodayPage() {
       {/* Hero header */}
       <div
         className="relative flex flex-col"
-        style={{ background: GRADIENT, minHeight: "44vh" }}
+        style={{ minHeight: "44vh" }}
       >
+        {/* Background: people group photo (placeholder: prayer-map) */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: "url('/prayer-map.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center 30%",
+          }}
+        />
+        <div className="absolute inset-0 z-0" style={{ background: GRADIENT }} />
         {/* Top nav */}
-        <div className="flex items-center justify-between px-5 pt-safe pt-4 pb-2">
+        <div className="relative z-10 flex items-center justify-between px-5 pt-safe pt-4 pb-2">
           <Link
             href="/"
             className="text-white/60 hover:text-white/90 transition-colors"
@@ -89,12 +100,20 @@ export default function TodayPage() {
             <div className="text-[10px] text-white/50 uppercase tracking-widest font-semibold">
               {tr(t.prayer.todayPrayer, lang)}
             </div>
+            <div className="text-[11px] text-white/70 font-medium mt-0.5">
+              {new Date().toLocaleDateString(lang === "id" ? "id-ID" : "en-GB", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </div>
           </div>
           <LanguageToggle variant="white" />
         </div>
 
         {/* People group info */}
-        <div className="flex-1 flex flex-col justify-end px-5 pb-6 pt-4">
+        <div className="relative z-10 flex-1 flex flex-col justify-end px-5 pb-6 pt-4">
           {/* Badges */}
           <div className="flex flex-wrap gap-2 mb-3">
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white/90">
@@ -139,14 +158,26 @@ export default function TodayPage() {
         <div className="flex flex-col items-center gap-4 mb-6">
           <PrayedButton onPrayed={handlePrayed} initialPrayed={hasPrayed} />
 
-          {/* Live counter */}
-          <p className="text-[var(--color-muted)] text-sm text-center">
-            {tr(t.prayer.joinCounter, lang)}{" "}
-            <span className="font-bold text-[var(--color-navy)]">
-              {prayerCount.toLocaleString("id")}
-            </span>{" "}
-            {tr(t.prayer.prayingToday, lang)}
-          </p>
+          {/* Live counters — today + last 30 days */}
+          <div className="flex items-center gap-5 justify-center">
+            <div className="text-center">
+              <div className="text-xl font-bold text-[var(--color-navy)] font-display">
+                {prayerCount.toLocaleString("id")}
+              </div>
+              <div className="text-[10px] text-[var(--color-muted)] uppercase tracking-widest">
+                {lang === "id" ? "berdoa hari ini" : "praying today"}
+              </div>
+            </div>
+            <div className="w-px h-8 bg-[var(--color-border)]" />
+            <div className="text-center">
+              <div className="text-xl font-bold text-[var(--color-navy)] font-display">
+                {thirtyDayCount.toLocaleString("id")}
+              </div>
+              <div className="text-[10px] text-[var(--color-muted)] uppercase tracking-widest">
+                {lang === "id" ? "30 hari terakhir" : "last 30 days"}
+              </div>
+            </div>
+          </div>
 
           {/* Streak */}
           {streakDays > 0 && (
