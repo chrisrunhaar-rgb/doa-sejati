@@ -249,6 +249,15 @@ export async function getIslandStats(): Promise<DSIslandStat[]> {
   return (data as DSIslandStat[]) ?? [];
 }
 
+// Helper: delete all user data and sign out
+export async function deleteAccount(userId: string): Promise<boolean> {
+  await supabase.from("ds_prayer_logs").delete().eq("user_id", userId);
+  await supabase.from("ds_users").delete().eq("id", userId);
+  await supabase.auth.signOut();
+  localStorage.removeItem("ds_user_id");
+  return true;
+}
+
 // Helper: update notification time, language, and/or name for a user
 export async function updateUserProfile(
   userId: string,

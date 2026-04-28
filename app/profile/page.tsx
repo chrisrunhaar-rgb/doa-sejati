@@ -5,15 +5,18 @@ import Link from "next/link";
 import { useLang } from "@/components/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import { t, tr } from "@/lib/i18n";
+import { useRouter } from "next/navigation";
 import {
   getUserProfile,
   getUserTotalPrayed,
   updateUserProfile,
+  deleteAccount,
   type DSUser,
 } from "@/lib/supabase";
 
 export default function ProfilePage() {
   const { lang } = useLang();
+  const router = useRouter();
   const [user, setUser] = useState<DSUser | null>(null);
   const [totalPrayed, setTotalPrayed] = useState(0);
   const [notifTime, setNotifTime] = useState("07:00");
@@ -218,7 +221,14 @@ export default function ProfilePage() {
               >
                 {tr(t.common.cancel, lang)}
               </button>
-              <button className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm">
+              <button
+                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm"
+                onClick={async () => {
+                  const userId = localStorage.getItem("ds_user_id");
+                  if (userId) await deleteAccount(userId);
+                  router.replace("/");
+                }}
+              >
                 {tr(t.common.confirm, lang)}
               </button>
             </div>
