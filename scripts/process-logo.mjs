@@ -30,23 +30,33 @@ async function main() {
     }).png().toBuffer();
   }
 
-  // Generate app icon: blue DS mark on white background, centred with padding
-  async function makeIcon(size, outPath) {
+  // Generate app icon: centred DS mark with padding
+  async function makeIcon(size, outPath, bg = { r: 255, g: 255, b: 255, alpha: 255 }) {
     const pad = Math.round(size * 0.14);
     const logoSize = size - pad * 2;
     const resized = await sharp(logoBuffer)
-      .resize(logoSize, logoSize, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 0 } })
+      .resize(logoSize, logoSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .toBuffer();
-    await sharp({ create: { width: size, height: size, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 255 } } })
+    await sharp({ create: { width: size, height: size, channels: 4, background: bg } })
       .composite([{ input: resized, gravity: 'center' }])
       .png()
       .toFile(outPath);
     console.log('→', path.basename(outPath));
   }
 
-  await makeIcon(192, path.join(ICONS, 'logo-192.png'));
-  await makeIcon(512, path.join(ICONS, 'logo-512.png'));
-  await makeIcon(180, path.join(ICONS, 'apple-touch-icon.png'));
+  const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
+  const NAVY       = { r: 13, g: 30, b: 61, alpha: 255 };
+  const WHITE      = { r: 255, g: 255, b: 255, alpha: 255 };
+
+  // v4: transparent background for taskbar/browser ("any" purpose)
+  await makeIcon(192, path.join(ICONS, 'logo-192-v4.png'), TRANSPARENT);
+  // v4 maskable: navy background for Android home screen
+  await makeIcon(512, path.join(ICONS, 'logo-512-v4.png'), NAVY);
+  // Apple touch icon: white background required by iOS
+  await makeIcon(180, path.join(ICONS, 'apple-touch-icon.png'), WHITE);
+  // Legacy plain names
+  await makeIcon(192, path.join(ICONS, 'logo-192.png'), TRANSPARENT);
+  await makeIcon(512, path.join(ICONS, 'logo-512.png'), NAVY);
 
   // Favicon: 32x32 transparent, copy to app/favicon.ico
   const faviconTmp = path.join(PUBLIC, 'favicon-tmp.png');

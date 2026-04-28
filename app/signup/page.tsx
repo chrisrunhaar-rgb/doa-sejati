@@ -320,7 +320,9 @@ export default function SignupPage() {
                   {tr(t.signup.installHint, lang)}
                 </p>
                 <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/8 border border-white/10 mb-6">
-                  <Image src="/icons/logo-ds.jpg" alt="" width={48} height={48} className="rounded-xl flex-shrink-0" />
+                  <div className="flex-shrink-0 rounded-2xl overflow-hidden shadow-lg" style={{ width: 60, height: 60, background: "white" }}>
+                    <Image src="/icons/logo-192-v3.png" alt="Doa Sejati" width={60} height={60} />
+                  </div>
                   <div>
                     <div className="font-bold text-white">Doa Sejati</div>
                     <div className="text-white/50 text-sm">doasejati.net</div>
