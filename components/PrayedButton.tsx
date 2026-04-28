@@ -28,10 +28,7 @@ export default function PrayedButton({
   if (prayed) {
     return (
       <div className="flex flex-col items-center gap-3">
-        <div className="animate-check-pop flex items-center justify-center gap-3 w-full max-w-xs py-4 rounded-2xl bg-[var(--color-prayed)] text-white font-bold text-lg tracking-wide">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+        <div className="w-full max-w-xs py-4 rounded-2xl bg-[var(--color-prayed)] text-white font-bold text-lg tracking-wide text-center">
           {tr(t.prayer.prayedConfirm, lang)}
         </div>
       </div>

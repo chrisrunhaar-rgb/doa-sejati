@@ -55,7 +55,7 @@ export const t = {
     population: { id: "jiwa", en: "people" },
     prayPoints: { id: "Pokok Doa", en: "Prayer Points" },
     prayedBtn: { id: "Saya Sudah Berdoa", en: "I Have Prayed" },
-    prayedConfirm: { id: "Doa tercatat ✓", en: "Prayer counted ✓" },
+    prayedConfirm: { id: "Sudah Berdoa", en: "Prayed" },
     prayingToday: { id: "orang berdoa hari ini", en: "people praying today" },
     joinCounter: { id: "Bergabung dengan", en: "Join" },
     streakDays: { id: "hari berturut-turut", en: "days in a row" },
