@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useLang } from "@/components/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
-import BottomNav from "@/components/BottomNav";
 import { t, tr } from "@/lib/i18n";
 
 // Mock data — replace with Supabase user data
@@ -157,7 +156,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <BottomNav />
     </div>
   );
 }

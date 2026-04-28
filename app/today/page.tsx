@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useLang } from "@/components/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
-import BottomNav from "@/components/BottomNav";
 import PrayedButton from "@/components/PrayedButton";
 import ShareSheet from "@/components/ShareSheet";
 import { t, tr } from "@/lib/i18n";
@@ -109,7 +108,19 @@ export default function TodayPage() {
               })}
             </div>
           </div>
-          <LanguageToggle variant="white" />
+          <div className="flex items-center gap-2">
+            <Link
+              href="/profile"
+              className="text-white/60 hover:text-white/90 transition-colors p-1"
+              aria-label="Profil"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+            </Link>
+            <LanguageToggle variant="white" />
+          </div>
         </div>
 
         {/* People group info */}
@@ -216,66 +227,7 @@ export default function TodayPage() {
           </Link>
         </div>
 
-        {/* People group details */}
-        <div className="border-t border-[var(--color-border)] pt-5 mb-4">
-          <h3 className="text-xs font-bold tracking-widest text-[var(--color-muted)] uppercase mb-3">
-            {lang === "id" ? "TENTANG SUKU INI" : "ABOUT THIS PEOPLE"}
-          </h3>
-
-          <dl className="flex flex-col gap-2">
-            {[
-              {
-                label: tr(t.prayer.bibleAccess, lang),
-                value:
-                  lang === "id"
-                    ? PRAYER_DATA.bibleAccessId
-                    : PRAYER_DATA.bibleAccessEn,
-              },
-              {
-                label: tr(t.prayer.believers, lang),
-                value:
-                  lang === "id"
-                    ? PRAYER_DATA.believersId
-                    : PRAYER_DATA.believersEn,
-              },
-            ].map(({ label, value }) => (
-              <div
-                key={label}
-                className="flex items-start justify-between gap-4"
-              >
-                <dt className="text-[var(--color-muted)] text-sm">{label}</dt>
-                <dd className="text-[var(--color-ink)] text-sm font-medium text-right">
-                  {value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-
-          <a
-            href={PRAYER_DATA.jpUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 block text-sm text-[var(--color-terra)] font-semibold"
-          >
-            {tr(t.prayer.learnMore, lang)}
-          </a>
-        </div>
-
-        {/* Give nudge — subtle, below the fold */}
-        <div className="mt-2 mb-2 p-4 rounded-xl bg-[var(--color-navy)]/4">
-          <p className="text-sm text-[var(--color-muted)] leading-relaxed">
-            {tr(t.prayer.give, lang)}{" "}
-            <a
-              href="https://jala-transformasi.net/donate"
-              className="text-[var(--color-terra)] font-semibold"
-            >
-              {lang === "id" ? "Dukung JATI →" : "Support JATI →"}
-            </a>
-          </p>
-        </div>
       </div>
-
-      <BottomNav />
 
       {showShare && (
         <ShareSheet
