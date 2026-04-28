@@ -346,34 +346,44 @@ export default function SignupPage() {
             </h2>
             <p className="text-white/60 text-sm mb-6">
               {lang === "id"
-                ? "Zona waktu WIB akan terdeteksi secara otomatis."
+                ? "Zona waktu kamu akan terdeteksi secara otomatis."
                 : "Your timezone will be detected automatically."}
             </p>
 
-            <div className="flex flex-col gap-3 mb-6">
+            {/* Quick picks */}
+            <div className="flex gap-2 mb-4">
               {[
-                { value: "07:00", icon: "🌅", label: tr(t.signup.morning, lang) },
-                { value: "12:00", icon: "☀️", label: tr(t.signup.noon, lang) },
-                { value: "20:00", icon: "🌙", label: tr(t.signup.evening, lang) },
+                { value: "07:00", icon: "🌅", label: lang === "id" ? "Pagi" : "Morning" },
+                { value: "12:00", icon: "☀️", label: lang === "id" ? "Siang" : "Noon" },
+                { value: "20:00", icon: "🌙", label: lang === "id" ? "Malam" : "Evening" },
               ].map(({ value, icon, label }) => (
                 <button
                   key={value}
                   onClick={() => setForm((f) => ({ ...f, notifTime: value }))}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
+                  className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl border transition-all ${
                     form.notifTime === value
                       ? "bg-[var(--color-terra)]/20 border-[var(--color-terra)] text-white"
-                      : "bg-white/8 border-white/10 text-white/80"
+                      : "bg-white/8 border-white/10 text-white/70"
                   }`}
                 >
-                  <span className="text-2xl">{icon}</span>
-                  <span className="font-semibold">{label}</span>
-                  {form.notifTime === value && (
-                    <svg className="ml-auto" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
+                  <span className="text-xl">{icon}</span>
+                  <span className="text-xs font-semibold">{label}</span>
+                  <span className="text-[10px] text-white/50">{value}</span>
                 </button>
               ))}
+            </div>
+
+            {/* Free time picker */}
+            <div className="mb-6">
+              <label className="block text-xs text-white/50 uppercase tracking-widest mb-2 px-1">
+                {lang === "id" ? "Atau pilih waktu sendiri" : "Or pick your own time"}
+              </label>
+              <input
+                type="time"
+                value={form.notifTime}
+                onChange={(e) => setForm((f) => ({ ...f, notifTime: e.target.value }))}
+                className="w-full px-4 py-4 rounded-2xl bg-white/10 border border-white/15 text-white text-lg font-semibold focus:outline-none focus:border-white/40 [color-scheme:dark]"
+              />
             </div>
 
             <button
