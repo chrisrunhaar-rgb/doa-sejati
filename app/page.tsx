@@ -60,8 +60,8 @@ export default function LandingPage() {
           <Image
             src="/icons/logo-ds-white.png"
             alt="Doa Sejati"
-            width={160}
-            height={160}
+            width={220}
+            height={220}
             className="opacity-90"
           />
         </div>

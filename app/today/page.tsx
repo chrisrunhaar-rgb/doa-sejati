@@ -221,6 +221,19 @@ export default function TodayPage() {
           )}
         </div>
 
+        {/* Joshua Project attribution — required by their terms of use */}
+        <p className="text-[10px] text-[var(--color-muted)] text-center mb-4">
+          {lang === "id" ? "Data suku dari" : "People group data from"}{" "}
+          <a
+            href="https://www.joshuaproject.net"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Joshua Project
+          </a>
+        </p>
+
         {/* Action row */}
         <div className="flex gap-3 mb-8">
           <button

@@ -176,8 +176,8 @@ export default function SignupPage() {
         <Image
           src="/icons/logo-ds-white.png"
           alt="Doa Sejati"
-          width={120}
-          height={120}
+          width={180}
+          height={180}
           className="mx-auto"
         />
       </div>
