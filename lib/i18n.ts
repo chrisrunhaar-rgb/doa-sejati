@@ -72,7 +72,7 @@ export const t = {
   share: {
     title: { id: "Bagikan Doa", en: "Share Prayer" },
     whatsapp: { id: "WhatsApp", en: "WhatsApp" },
-    instagram: { id: "Instagram", en: "Instagram" },
+    other: { id: "Lainnya", en: "Other" },
     copy: { id: "Salin tautan", en: "Copy link" },
     copied: { id: "Tersalin!", en: "Copied!" },
     message: {

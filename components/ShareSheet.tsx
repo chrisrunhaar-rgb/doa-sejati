@@ -18,10 +18,7 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
   const fullMessage = `${message}\n${url}`;
 
   const shareWhatsApp = () => {
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(fullMessage)}`,
-      "_blank"
-    );
+    window.open(`https://wa.me/?text=${encodeURIComponent(fullMessage)}`, "_blank");
   };
 
   const copyLink = async () => {
@@ -36,10 +33,17 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
     }
   };
 
+  const hasNativeShare = typeof navigator !== "undefined" && "share" in navigator;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
+    // Backdrop — full screen, click-outside closes
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+      {/* Dim overlay */}
+      <div className="absolute inset-0 bg-black/40" />
+
+      {/* Sheet — constrained to max app width */}
       <div
-        className="w-full bg-white rounded-t-3xl p-6 shadow-2xl animate-float-in"
+        className="relative w-full max-w-md bg-white rounded-t-3xl p-6 shadow-2xl animate-float-in"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
@@ -49,6 +53,7 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
         </h3>
 
         <div className="flex gap-3 mb-4">
+          {/* WhatsApp */}
           <button
             onClick={shareWhatsApp}
             className="flex-1 flex flex-col items-center gap-2 py-4 rounded-2xl bg-[#25D366]/10 text-[#128C7E] font-semibold"
@@ -59,7 +64,8 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
             {tr(t.share.whatsapp, lang)}
           </button>
 
-          {typeof navigator !== "undefined" && "share" in navigator && (
+          {/* Native share (Other) — only on devices that support it */}
+          {hasNativeShare && (
             <button
               onClick={shareNative}
               className="flex-1 flex flex-col items-center gap-2 py-4 rounded-2xl bg-[var(--color-navy)]/8 text-[var(--color-navy)] font-semibold"
@@ -71,10 +77,11 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
                 <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
                 <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
               </svg>
-              {tr(t.share.instagram, lang)}
+              {tr(t.share.other, lang)}
             </button>
           )}
 
+          {/* Copy link */}
           <button
             onClick={copyLink}
             className="flex-1 flex flex-col items-center gap-2 py-4 rounded-2xl bg-[var(--color-surface)] text-[var(--color-ink)] font-semibold"
