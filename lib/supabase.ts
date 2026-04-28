@@ -113,6 +113,12 @@ export async function recordPrayer(
   userId: string,
   contentId: string
 ): Promise<boolean> {
+  // Ensure user row exists before inserting prayer log (FK constraint)
+  await supabase.from("ds_users").upsert(
+    { id: userId, language: "id", notification_time: "07:00", timezone: "Asia/Jakarta" },
+    { onConflict: "id", ignoreDuplicates: true }
+  );
+
   const { error } = await supabase.from("ds_prayer_logs").insert({
     user_id: userId,
     content_id: contentId,
@@ -137,10 +143,19 @@ export async function recordPrayer(
       ? (profile.streak_count || 0) + 1
       : 1;
 
-  await supabase
-    .from("ds_users")
-    .update({ streak_count: newStreak, streak_last_date: today, last_prayed_at: new Date().toISOString() })
-    .eq("id", userId);
+  // upsert so streak is written even if ds_users row is missing
+  await supabase.from("ds_users").upsert(
+    {
+      id: userId,
+      streak_count: newStreak,
+      streak_last_date: today,
+      last_prayed_at: new Date().toISOString(),
+      language: profile?.language ?? "id",
+      notification_time: profile?.notification_time ?? "07:00",
+      timezone: profile?.timezone ?? "Asia/Jakarta",
+    },
+    { onConflict: "id" }
+  );
 
   return true;
 }
