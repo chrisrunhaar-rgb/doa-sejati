@@ -17,7 +17,7 @@ import {
 } from "@/lib/supabase";
 
 const GRADIENT =
-  "linear-gradient(170deg, oklch(16% 0.08 258 / 0.95) 0%, oklch(20% 0.09 248 / 0.85) 100%)";
+  "linear-gradient(to bottom, oklch(14% 0.07 258 / 0.30) 0%, oklch(14% 0.07 258 / 0.10) 35%, oklch(16% 0.08 258 / 0.75) 100%)";
 
 export default function TodayPage() {
   const { lang } = useLang();
