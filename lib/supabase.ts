@@ -5,9 +5,15 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Server-side client (service role) — only use in API routes / server actions
+export function createServiceClient() {
+  return createClient(supabaseUrl, process.env.SUPABASE_SERVICE_KEY!);
+}
+
 // Types matching the database schema
 export interface DSUser {
   id: string;
+  name: string;
   email: string | null;
   push_token: object | null;
   language: "id" | "en";
@@ -141,4 +147,44 @@ export async function getProvinceCounts(): Promise<
 
   if (!data) return {};
   return Object.fromEntries(data.map((r) => [r.province_name, r.prayer_count]));
+}
+
+// Helper: upsert user profile after signup
+export async function saveUserProfile(
+  userId: string,
+  profile: {
+    name: string;
+    language: "id" | "en";
+    notification_time: string;
+    timezone: string;
+    push_token: object | null;
+  }
+): Promise<boolean> {
+  const { error } = await supabase.from("ds_users").upsert(
+    { id: userId, ...profile },
+    { onConflict: "id" }
+  );
+  return !error;
+}
+
+// Helper: get 30-day prayer count across all UPGs
+export async function getThirtyDayCount(): Promise<number> {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const { count } = await supabase
+    .from("ds_prayer_logs")
+    .select("id", { count: "exact", head: true })
+    .gte("prayed_at", thirtyDaysAgo.toISOString());
+  return count ?? 0;
+}
+
+// Helper: get today's total prayer count
+export async function getTodayTotalCount(): Promise<number> {
+  const today = new Date().toISOString().split("T")[0];
+  const { data } = await supabase
+    .from("ds_upg_daily_counts")
+    .select("prayer_count")
+    .eq("date", today);
+  if (!data) return 0;
+  return data.reduce((sum, r) => sum + r.prayer_count, 0);
 }

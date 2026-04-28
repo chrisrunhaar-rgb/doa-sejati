@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/components/LanguageContext";
 import { t, tr } from "@/lib/i18n";
+import { supabase, saveUserProfile } from "@/lib/supabase";
 import type { Lang } from "@/lib/i18n";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
@@ -13,7 +14,6 @@ type Step = 1 | 2 | 3 | 4 | 5 | 6;
 interface FormData {
   language: Lang;
   name: string;
-  email: string;
   notifTime: "07:00" | "12:00" | "20:00" | string;
   consent: boolean;
 }
@@ -25,7 +25,6 @@ export default function SignupPage() {
   const [form, setForm] = useState<FormData>({
     language: "id",
     name: "",
-    email: "",
     notifTime: "07:00",
     consent: false,
   });
@@ -101,8 +100,41 @@ export default function SignupPage() {
     }
   };
 
-  const handleFinish = () => {
-    // In production: save user to Supabase
+  const handleFinish = async () => {
+    try {
+      // 1. Create anonymous Supabase session
+      const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
+      if (authError || !authData.user) throw authError;
+
+      const userId = authData.user.id;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      // 2. Get push subscription if available
+      let pushToken: object | null = null;
+      if ("serviceWorker" in navigator) {
+        try {
+          const reg = await navigator.serviceWorker.ready;
+          const sub = await reg.pushManager.getSubscription();
+          if (sub) pushToken = sub.toJSON();
+        } catch {
+          // push not available — continue
+        }
+      }
+
+      // 3. Save profile to ds_users
+      await saveUserProfile(userId, {
+        name: form.name,
+        language: form.language,
+        notification_time: form.notifTime,
+        timezone,
+        push_token: pushToken,
+      });
+
+      // 4. Persist userId for session
+      localStorage.setItem("ds_user_id", userId);
+    } catch {
+      // Auth or save failed — still proceed to app (offline-tolerant)
+    }
     router.push("/today");
   };
 
@@ -205,20 +237,6 @@ export default function SignupPage() {
               autoComplete="given-name"
               className="w-full px-4 py-3.5 rounded-xl bg-white/10 border border-white/15 text-white placeholder-white/30 focus:outline-none focus:border-white/40 mb-3"
             />
-
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              placeholder={lang === "id" ? "Email (opsional)" : "Email (optional)"}
-              autoComplete="email"
-              className="w-full px-4 py-3.5 rounded-xl bg-white/10 border border-white/15 text-white placeholder-white/30 focus:outline-none focus:border-white/40 mb-1"
-            />
-            <p className="text-white/35 text-xs mb-5 px-1">
-              {lang === "id"
-                ? "Untuk rekap doa bulanan. Bisa ditambahkan nanti."
-                : "For monthly prayer recaps. Can be added later."}
-            </p>
 
             <button
               onClick={handleNameStep}
