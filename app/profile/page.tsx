@@ -17,6 +17,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState<DSUser | null>(null);
   const [totalPrayed, setTotalPrayed] = useState(0);
   const [notifTime, setNotifTime] = useState("07:00");
+  const [editName, setEditName] = useState("");
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -31,6 +32,7 @@ export default function ProfilePage() {
       ]);
       if (profile) {
         setUser(profile);
+        setEditName(profile.name || "");
         setNotifTime(profile.notification_time || "07:00");
       }
       setTotalPrayed(total);
@@ -39,7 +41,7 @@ export default function ProfilePage() {
     load();
   }, []);
 
-  const userName = user?.name || "";
+  const userName = editName || user?.name || "";
   const streakCount = user?.streak_count || 0;
   const memberSince = user
     ? new Date(user.created_at).toLocaleDateString(
@@ -51,8 +53,9 @@ export default function ProfilePage() {
   const handleSave = async () => {
     const userId = localStorage.getItem("ds_user_id");
     if (userId) {
-      await updateUserProfile(userId, { notification_time: notifTime, language: lang });
+      await updateUserProfile(userId, { name: editName.trim() || undefined, notification_time: notifTime, language: lang });
     }
+    setUser((u) => u ? { ...u, name: editName.trim() } : u);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -123,6 +126,22 @@ export default function ProfilePage() {
       {/* Settings */}
       <div className="flex-1 px-5 pt-6 pb-10">
         <div className="bg-white rounded-2xl overflow-hidden mb-4">
+          {/* Name */}
+          <div className="px-4 py-4">
+            <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider block mb-2">
+              {lang === "id" ? "Nama" : "Name"}
+            </label>
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder={lang === "id" ? "Nama kamu" : "Your name"}
+              className="w-full bg-[var(--color-surface)] rounded-xl px-3 py-2.5 text-[var(--color-ink)] font-semibold focus:outline-none"
+            />
+          </div>
+
+          <div className="border-t border-[var(--color-border)] mx-4" />
+
           {/* Reminder time */}
           <div className="px-4 py-4">
             <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider block mb-2">

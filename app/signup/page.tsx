@@ -36,6 +36,13 @@ export default function SignupPage() {
   const [isStandalone, setIsStandalone] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
 
+  // Redirect existing users
+  useEffect(() => {
+    if (localStorage.getItem("ds_user_id")) {
+      router.replace("/today");
+    }
+  }, [router]);
+
   // Platform detection
   useEffect(() => {
     setIsIOS(/iphone|ipad|ipod/i.test(navigator.userAgent));

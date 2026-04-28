@@ -212,11 +212,13 @@ export async function getUserTotalPrayed(userId: string): Promise<number> {
   return count ?? 0;
 }
 
-// Helper: update notification time and/or language for a user
+// Helper: update notification time, language, and/or name for a user
 export async function updateUserProfile(
   userId: string,
-  updates: { notification_time?: string; language?: "id" | "en" }
+  updates: { name?: string; notification_time?: string; language?: "id" | "en" }
 ): Promise<boolean> {
-  const { error } = await supabase.from("ds_users").update(updates).eq("id", userId);
+  const { error } = await supabase
+    .from("ds_users")
+    .upsert({ id: userId, ...updates }, { onConflict: "id" });
   return !error;
 }
