@@ -27,10 +27,8 @@ export default function PrayedButton({
 
   if (prayed) {
     return (
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-full max-w-xs py-4 rounded-2xl bg-[var(--color-prayed)] text-white font-bold text-lg tracking-wide text-center">
-          {tr(t.prayer.prayedConfirm, lang)}
-        </div>
+      <div className="relative w-full max-w-xs py-4 rounded-2xl bg-[var(--color-prayed)] text-white font-bold text-lg tracking-wide text-center shadow-lg shadow-[var(--color-prayed)]/30">
+        {tr(t.prayer.prayedConfirm, lang)}
       </div>
     );
   }
@@ -55,9 +53,7 @@ export default function PrayedButton({
         </span>
       ) : (
         <>
-          <span className="flex items-center justify-center gap-2">
-            🙏 {tr(t.prayer.prayedBtn, lang)}
-          </span>
+          {tr(t.prayer.prayedBtn, lang)}
           <span className="absolute -inset-1 rounded-2xl animate-[pulse-ring_2s_ease-out_infinite] border-2 border-[var(--color-terra)] opacity-30 pointer-events-none" />
         </>
       )}
