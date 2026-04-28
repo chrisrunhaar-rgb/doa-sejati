@@ -595,10 +595,11 @@ function PrayerPreviewModal({ item, onClose }: { item: UpcomingContent; onClose:
           {/* Prayed button */}
           <div style={{
             width: "100%", padding: "16px 0", borderRadius: 16,
-            background: "oklch(20% 0.09 258)", color: "white",
+            background: "var(--color-terra)", color: "white",
             fontWeight: 700, fontSize: 15, textAlign: "center",
+            boxShadow: "0 8px 24px oklch(55% 0.13 38 / 0.30)",
           }}>
-            🙏 Saya Sudah Berdoa
+            Saya Sudah Berdoa
           </div>
         </div>
       </div>
