@@ -10,49 +10,22 @@ export async function GET(req: Request) {
   const supabase = createServiceClient();
 
   const [
-    totalUsersRes,
-    todayNewUsersRes,
-    pushTokenRes,
-    totalPrayersRes,
-    todayPrayersRes,
-    thirtyDayPrayersRes,
-    avgStreakRes,
-    streak7Res,
-    streak30Res,
+    totalUsersRes, todayNewUsersRes, pushTokenRes,
+    totalPrayersRes, todayPrayersRes, thirtyDayPrayersRes,
+    avgStreakRes, streak7Res, streak30Res, pushOpensRes,
   ] = await Promise.all([
     supabase.from("ds_users").select("*", { count: "exact", head: true }),
-    supabase
-      .from("ds_users")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", new Date().toISOString().split("T")[0]),
-    supabase
-      .from("ds_users")
-      .select("*", { count: "exact", head: true })
-      .not("push_token", "is", null),
+    supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("created_at", new Date().toISOString().split("T")[0]),
+    supabase.from("ds_users").select("*", { count: "exact", head: true }).not("push_token", "is", null),
     supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }),
-    supabase
-      .from("ds_prayer_logs")
-      .select("*", { count: "exact", head: true })
-      .gte("prayed_at", new Date().toISOString().split("T")[0]),
-    supabase
-      .from("ds_prayer_logs")
-      .select("*", { count: "exact", head: true })
-      .gte("prayed_at", new Date(Date.now() - 30 * 86400000).toISOString()),
-    supabase
-      .from("ds_users")
-      .select("streak_count")
-      .gt("streak_count", 0),
-    supabase
-      .from("ds_users")
-      .select("*", { count: "exact", head: true })
-      .gte("streak_count", 7),
-    supabase
-      .from("ds_users")
-      .select("*", { count: "exact", head: true })
-      .gte("streak_count", 30),
+    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).gte("prayed_at", new Date().toISOString().split("T")[0]),
+    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).gte("prayed_at", new Date(Date.now() - 30 * 86400000).toISOString()),
+    supabase.from("ds_users").select("streak_count").gt("streak_count", 0),
+    supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("streak_count", 7),
+    supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("streak_count", 30),
+    supabase.from("ds_notification_opens").select("*", { count: "exact", head: true }).gte("opened_at", new Date(Date.now() - 30 * 86400000).toISOString()),
   ]);
 
-  // Compute avg streak from data
   let avgStreak = 0;
   if (avgStreakRes.data && avgStreakRes.data.length > 0) {
     const streaks = avgStreakRes.data as { streak_count: number }[];
@@ -70,5 +43,6 @@ export async function GET(req: Request) {
     avgStreak,
     usersWithStreakOver7: streak7Res.count ?? 0,
     usersWithStreakOver30: streak30Res.count ?? 0,
+    pushOpens30d: pushOpensRes.count ?? 0,
   });
 }

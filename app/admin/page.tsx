@@ -14,6 +14,7 @@ interface Stats {
   avgStreak: number;
   usersWithStreakOver7: number;
   usersWithStreakOver30: number;
+  pushOpens30d: number;
 }
 
 interface VolumeEntry {
@@ -42,6 +43,13 @@ interface UpcomingContent {
   nameEn: string;
   titleId: string;
   titleEn: string;
+  prayerTextId: string;
+  prayerTextEn: string;
+  prayerPointsId: string[];
+  prayerPointsEn: string[];
+  population: number;
+  province: string;
+  island: string;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -450,14 +458,148 @@ function RecentSignupsTable({
   );
 }
 
+// ─── Prayer Preview Modal ─────────────────────────────────────────────────────
+
+const HERO_GRADIENT = "linear-gradient(170deg, oklch(16% 0.08 258 / 0.95) 0%, oklch(20% 0.09 248 / 0.85) 100%)";
+
+function PrayerPreviewModal({ item, onClose }: { item: UpcomingContent; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.75)" }}
+      onClick={onClose}
+    >
+      {/* Label above phone */}
+      <div
+        className="absolute text-xs font-semibold px-3 py-1.5 rounded-full"
+        style={{
+          top: "max(16px, calc(50% - 430px))",
+          background: "rgba(255,255,255,0.15)",
+          color: "white",
+          left: "50%",
+          transform: "translateX(-50%)",
+          whiteSpace: "nowrap",
+        }}
+      >
+        Preview · {item.nameId} · {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+      </div>
+
+      {/* Phone shell */}
+      <div
+        className="relative overflow-hidden overflow-y-auto"
+        style={{
+          width: 390,
+          maxHeight: "85vh",
+          borderRadius: 40,
+          boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 0 2px oklch(35% 0.05 258)",
+          background: "white",
+          scrollbarWidth: "none",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full flex items-center justify-center"
+          style={{ background: "rgba(255,255,255,0.2)" }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+
+        {/* Hero */}
+        <div
+          className="relative flex flex-col"
+          style={{
+            minHeight: 320,
+            backgroundImage: "url('/prayer-map.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center 30%",
+          }}
+        >
+          <div className="absolute inset-0" style={{ background: HERO_GRADIENT }} />
+
+          {/* Nav bar */}
+          <div className="relative z-10 flex items-center justify-center px-5 pt-12 pb-2">
+            <div className="text-center">
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.15em", fontWeight: 600 }}>
+                DOA HARI INI
+              </div>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontWeight: 500, marginTop: 2 }}>
+                {new Date(item.date + "T00:00:00").toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              </div>
+            </div>
+          </div>
+
+          {/* People group */}
+          <div className="relative z-10 flex-1 flex flex-col justify-end px-5 pb-6 pt-4">
+            <div className="flex flex-wrap gap-2 mb-3">
+              {item.province && (
+                <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.9)" }}>
+                  {item.province}{item.island ? `, ${item.island}` : ""}
+                </span>
+              )}
+              {item.population > 0 && (
+                <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.9)" }}>
+                  {item.population.toLocaleString("id")} jiwa
+                </span>
+              )}
+            </div>
+            <h1 style={{ fontSize: 34, fontWeight: 700, color: "white", lineHeight: 1.1, marginBottom: 12, fontFamily: "var(--font-display)" }}>
+              {item.nameId}
+            </h1>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.65 }}>
+              {item.prayerTextId}
+            </p>
+          </div>
+        </div>
+
+        {/* Prayer content */}
+        <div style={{ background: "white", padding: "24px 20px 32px" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#9ca3af", marginBottom: 16 }}>
+            Pokok Doa
+          </div>
+          <ol style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32, paddingLeft: 0, listStyle: "none" }}>
+            {item.prayerPointsId.map((point, i) => (
+              <li key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                <span style={{
+                  flexShrink: 0, width: 28, height: 28, borderRadius: 999,
+                  background: "oklch(20% 0.09 258 / 0.08)", color: "oklch(20% 0.09 258)",
+                  fontWeight: 700, fontSize: 13,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {i + 1}
+                </span>
+                <p style={{ fontSize: 13, lineHeight: 1.65, color: "#1a1a2e", paddingTop: 4, margin: 0 }}>{point}</p>
+              </li>
+            ))}
+          </ol>
+
+          {/* Prayed button */}
+          <div style={{
+            width: "100%", padding: "16px 0", borderRadius: 16,
+            background: "oklch(20% 0.09 258)", color: "white",
+            fontWeight: 700, fontSize: 15, textAlign: "center",
+          }}>
+            🙏 Saya Sudah Berdoa
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Content Calendar ─────────────────────────────────────────────────────────
 
 function ContentCalendar({
   data,
   loading,
+  onPreview,
 }: {
   data: UpcomingContent[];
   loading: boolean;
+  onPreview: (item: UpcomingContent) => void;
 }) {
   const todayStr = new Date().toISOString().split("T")[0];
 
@@ -466,12 +608,17 @@ function ContentCalendar({
       className="rounded-xl p-5"
       style={{ background: "white", boxShadow: "0 1px 4px rgba(13,30,61,0.08)" }}
     >
-      <h2
-        className="text-sm font-semibold uppercase tracking-widest mb-4"
-        style={{ color: "var(--color-muted)" }}
-      >
-        Jadwal Doa — 14 Hari Ke Depan
-      </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2
+          className="text-sm font-semibold uppercase tracking-widest"
+          style={{ color: "var(--color-muted)" }}
+        >
+          Jadwal Doa — 30 Hari Ke Depan
+        </h2>
+        <span className="text-xs" style={{ color: "var(--color-muted)" }}>
+          Klik baris untuk preview di ponsel
+        </span>
+      </div>
 
       {loading ? (
         <div className="flex flex-col gap-3">
@@ -485,14 +632,14 @@ function ContentCalendar({
         </div>
       ) : data.length === 0 ? (
         <p className="text-sm" style={{ color: "var(--color-muted)" }}>
-          Tidak ada konten terjadwal dalam 14 hari ke depan.
+          Tidak ada konten terjadwal dalam 30 hari ke depan.
         </p>
       ) : (
         <div className="overflow-auto">
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr style={{ borderBottom: "2px solid var(--color-border)" }}>
-                {["Tanggal", "Suku Bangsa", "Judul Doa (ID)"].map((h) => (
+                {["Tanggal", "Suku Bangsa", "Judul Doa (ID)", ""].map((h) => (
                   <th
                     key={h}
                     className="text-left pb-2 pr-4 font-semibold uppercase tracking-wider"
@@ -509,24 +656,21 @@ function ContentCalendar({
                 return (
                   <tr
                     key={row.date}
-                    className="border-b"
+                    className="border-b cursor-pointer group"
                     style={{
                       borderColor: "var(--color-border)",
-                      background: isToday
-                        ? "oklch(20% 0.09 258 / 0.06)"
-                        : "transparent",
+                      background: isToday ? "oklch(20% 0.09 258 / 0.06)" : "transparent",
                     }}
+                    onClick={() => onPreview(row)}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "oklch(20% 0.09 258 / 0.04)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = isToday ? "oklch(20% 0.09 258 / 0.06)" : "transparent"; }}
                   >
-                    <td className="py-2.5 pr-4 font-mono font-semibold flex-shrink-0 whitespace-nowrap" style={{ color: isToday ? "var(--color-navy)" : "var(--color-muted)" }}>
+                    <td className="py-2.5 pr-4 font-mono font-semibold whitespace-nowrap" style={{ color: isToday ? "var(--color-navy)" : "var(--color-muted)" }}>
                       {fmtDateFull(row.date)}
                       {isToday && (
                         <span
-                          className="ml-2 px-1 py-0.5 rounded text-xs font-bold"
-                          style={{
-                            background: "var(--color-terra)",
-                            color: "white",
-                            fontSize: 9,
-                          }}
+                          className="ml-2 px-1 py-0.5 rounded font-bold"
+                          style={{ background: "var(--color-terra)", color: "white", fontSize: 9 }}
                         >
                           HARI INI
                         </span>
@@ -535,16 +679,19 @@ function ContentCalendar({
                     <td className="py-2.5 pr-4 font-medium" style={{ color: "var(--color-ink)" }}>
                       {row.nameId || "—"}
                       {row.nameEn && row.nameEn !== row.nameId && (
-                        <span
-                          className="ml-1"
-                          style={{ color: "var(--color-muted)", fontWeight: 400 }}
-                        >
+                        <span className="ml-1" style={{ color: "var(--color-muted)", fontWeight: 400 }}>
                           ({row.nameEn})
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5" style={{ color: "var(--color-muted)" }}>
+                    <td className="py-2.5 pr-4" style={{ color: "var(--color-muted)" }}>
                       {row.titleId || "—"}
+                    </td>
+                    <td className="py-2.5 text-right" style={{ color: "var(--color-muted)", opacity: 0.4 }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: "inline" }}>
+                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                        <path d="M8 21h8M12 17v4" />
+                      </svg>
                     </td>
                   </tr>
                 );
@@ -687,6 +834,7 @@ export default function AdminPage() {
   const [provinces, setProvinces] = useState<ProvinceEntry[]>([]);
   const [content, setContent] = useState<UpcomingContent[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [previewItem, setPreviewItem] = useState<UpcomingContent | null>(null);
 
   // Loading states
   const [loadingStats, setLoadingStats] = useState(true);
@@ -938,6 +1086,14 @@ export default function AdminPage() {
             loading={loadingStats}
             accent
           />
+          <StatCard
+            label="Notif Dibuka (30h)"
+            value={stats?.pushOpens30d ?? 0}
+            sub={stats && stats.usersWithPushToken > 0
+              ? `${Math.round((stats.pushOpens30d / stats.usersWithPushToken) * 100)}% open rate`
+              : "dari push terkirim"}
+            loading={loadingStats}
+          />
         </section>
 
         {/* ── Bar Chart ── */}
@@ -953,7 +1109,10 @@ export default function AdminPage() {
         </section>
 
         {/* ── Content Calendar ── */}
-        <ContentCalendar data={content} loading={loadingContent} />
+        <ContentCalendar data={content} loading={loadingContent} onPreview={setPreviewItem} />
+
+        {/* ── Prayer Preview Modal ── */}
+        {previewItem && <PrayerPreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />}
 
         {/* ── Footer ── */}
         <footer

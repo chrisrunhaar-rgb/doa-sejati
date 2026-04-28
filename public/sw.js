@@ -86,7 +86,8 @@ self.addEventListener("notificationclick", (event) => {
 
   if (event.action === "later") return;
 
-  const url = event.notification.data?.url || "/today";
+  const baseUrl = event.notification.data?.url || "/today";
+  const url = baseUrl + "?ref=push";
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {

@@ -29,6 +29,22 @@ export default function TodayPage() {
   const [streakDays, setStreakDays] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // Track push notification opens
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("ref") !== "push") return;
+    const userId = localStorage.getItem("ds_user_id");
+    if (userId) {
+      fetch("/api/notification-open", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      }).catch(() => {});
+    }
+    window.history.replaceState({}, "", window.location.pathname);
+  }, []);
+
   useEffect(() => {
     async function load() {
       const [todayContent, todayCount, thirtyCount] = await Promise.all([
