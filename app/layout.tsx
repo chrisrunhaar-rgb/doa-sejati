@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Vollkorn, Manrope } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/components/LanguageContext";
+import { InstallPromptProvider } from "@/components/InstallPromptProvider";
 
 const vollkorn = Vollkorn({
   variable: "--font-vollkorn",
@@ -58,7 +59,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full bg-[var(--color-navy-deep)] antialiased">
         <div className="max-w-md mx-auto min-h-screen bg-[var(--color-cream)]">
-          <LanguageProvider>{children}</LanguageProvider>
+          <InstallPromptProvider>
+            <LanguageProvider>{children}</LanguageProvider>
+          </InstallPromptProvider>
         </div>
         <script
           dangerouslySetInnerHTML={{

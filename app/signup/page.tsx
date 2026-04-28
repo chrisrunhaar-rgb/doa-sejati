@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useLang } from "@/components/LanguageContext";
 import { t, tr } from "@/lib/i18n";
 import { supabase, saveUserProfile } from "@/lib/supabase";
+import { useInstallPrompt } from "@/components/InstallPromptProvider";
 import type { Lang } from "@/lib/i18n";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
@@ -29,21 +30,11 @@ export default function SignupPage() {
     consent: false,
   });
   const [notifGranted, setNotifGranted] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
+  const { prompt: installPrompt } = useInstallPrompt();
   const [installed, setInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
-
-  // Capture PWA install prompt (Android Chrome)
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
 
   // Platform detection
   useEffect(() => {
