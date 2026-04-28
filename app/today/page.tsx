@@ -1,0 +1,257 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useLang } from "@/components/LanguageContext";
+import LanguageToggle from "@/components/LanguageToggle";
+import BottomNav from "@/components/BottomNav";
+import PrayedButton from "@/components/PrayedButton";
+import ShareSheet from "@/components/ShareSheet";
+import { t, tr } from "@/lib/i18n";
+
+// Mock prayer data — will be fetched from Supabase in production
+const PRAYER_DATA = {
+  peopleGroupId: "aceh-aceh",
+  nameId: "Orang Aceh",
+  nameEn: "The Acehnese",
+  province: "Aceh",
+  island: "Sumatera",
+  population: "4.100.000",
+  religionId: "Islam (99.8%)",
+  religionEn: "Islam (99.8%)",
+  bibleAccessId: "Sebagian (Perjanjian Baru tersedia)",
+  bibleAccessEn: "Partial (New Testament available)",
+  believersId: "< 0.1%",
+  believersEn: "< 0.1%",
+  progressScale: 2,
+  jpUrl: "https://joshuaproject.net/people_groups/10087/ID",
+  contextId:
+    "Orang Aceh adalah salah satu suku terbesar di Indonesia, dengan sekitar 4,1 juta jiwa yang tinggal di ujung barat Sumatera. Hampir seluruhnya beragama Islam, dan hampir tidak ada orang percaya di antara mereka.",
+  contextEn:
+    "The Acehnese are one of Indonesia's largest people groups, with around 4.1 million people living at the western tip of Sumatra. They are almost entirely Muslim, with very few known believers among them.",
+  prayerPointsId: [
+    "Doakan agar orang Aceh yang mencari kedamaian sejati dapat berjumpa dengan Yesus melalui mimpi atau kesaksian yang nyata.",
+    "Doakan agar Alkitab dalam bahasa Aceh dapat dibaca dan disebarluaskan di antara orang-orang yang rindu kebenaran.",
+    "Doakan agar para pelayan dan pekerja yang tinggal di tengah orang Aceh dapat hidup dengan integritas, kasih, dan keberanian.",
+  ],
+  prayerPointsEn: [
+    "Pray that Acehnese seeking true peace would encounter Jesus through dreams or a genuine witness.",
+    "Pray that the Acehnese New Testament would be read and distributed among those who hunger for truth.",
+    "Pray for workers and servants living among the Acehnese to live with integrity, love, and courage.",
+  ],
+  prayerCountToday: 1247,
+  streakDays: 0,
+};
+
+const GRADIENT =
+  "linear-gradient(160deg, oklch(18% 0.09 258) 0%, oklch(28% 0.12 240) 50%, oklch(22% 0.08 270) 100%)";
+
+export default function TodayPage() {
+  const { lang } = useLang();
+  const [showShare, setShowShare] = useState(false);
+  const [prayerCount, setPrayerCount] = useState(PRAYER_DATA.prayerCountToday);
+  const [streakDays, setStreakDays] = useState(PRAYER_DATA.streakDays);
+  const [hasPrayed, setHasPrayed] = useState(false);
+
+  const groupName =
+    lang === "id" ? PRAYER_DATA.nameId : PRAYER_DATA.nameEn;
+  const prayerPoints =
+    lang === "id"
+      ? PRAYER_DATA.prayerPointsId
+      : PRAYER_DATA.prayerPointsEn;
+
+  const handlePrayed = async () => {
+    // In production: call Supabase to record prayer
+    setPrayerCount((n) => n + 1);
+    setStreakDays((n) => n + 1);
+    setHasPrayed(true);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Hero header */}
+      <div
+        className="relative flex flex-col"
+        style={{ background: GRADIENT, minHeight: "44vh" }}
+      >
+        {/* Top nav */}
+        <div className="flex items-center justify-between px-5 pt-safe pt-4 pb-2">
+          <Link
+            href="/"
+            className="text-white/60 hover:text-white/90 transition-colors"
+            aria-label="Beranda"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </Link>
+          <div className="text-center">
+            <div className="text-[10px] text-white/50 uppercase tracking-widest font-semibold">
+              {tr(t.prayer.todayPrayer, lang)}
+            </div>
+          </div>
+          <LanguageToggle variant="white" />
+        </div>
+
+        {/* People group info */}
+        <div className="flex-1 flex flex-col justify-end px-5 pb-6 pt-4">
+          {/* Badges */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white/90">
+              {PRAYER_DATA.province}, {PRAYER_DATA.island}
+            </span>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white/90">
+              {PRAYER_DATA.population} {tr(t.prayer.population, lang)}
+            </span>
+          </div>
+
+          <h1 className="font-display text-4xl font-bold text-white leading-tight mb-3">
+            {groupName}
+          </h1>
+
+          <p className="text-white/70 text-sm leading-relaxed">
+            {lang === "id" ? PRAYER_DATA.contextId : PRAYER_DATA.contextEn}
+          </p>
+        </div>
+      </div>
+
+      {/* Prayer content */}
+      <div className="flex-1 bg-white px-5 pt-6 mb-nav">
+        {/* Prayer points */}
+        <h2 className="text-xs font-bold tracking-widest text-[var(--color-muted)] uppercase mb-4">
+          {tr(t.prayer.prayPoints, lang)}
+        </h2>
+
+        <ol className="flex flex-col gap-4 mb-8">
+          {prayerPoints.map((point, i) => (
+            <li key={i} className="flex gap-3 items-start">
+              <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-navy)]/8 text-[var(--color-navy)] font-bold text-sm flex items-center justify-center">
+                {i + 1}
+              </span>
+              <p className="text-[var(--color-ink)] text-sm leading-relaxed pt-0.5">
+                {point}
+              </p>
+            </li>
+          ))}
+        </ol>
+
+        {/* Prayed button */}
+        <div className="flex flex-col items-center gap-4 mb-6">
+          <PrayedButton onPrayed={handlePrayed} initialPrayed={hasPrayed} />
+
+          {/* Live counter */}
+          <p className="text-[var(--color-muted)] text-sm text-center">
+            {tr(t.prayer.joinCounter, lang)}{" "}
+            <span className="font-bold text-[var(--color-navy)]">
+              {prayerCount.toLocaleString("id")}
+            </span>{" "}
+            {tr(t.prayer.prayingToday, lang)}
+          </p>
+
+          {/* Streak */}
+          {streakDays > 0 && (
+            <div className="streak-badge px-4 py-2 rounded-full text-sm">
+              🔥 {tr(t.prayer.streakLabel, lang)} {streakDays}{" "}
+              {tr(t.prayer.streakDays, lang)}
+            </div>
+          )}
+        </div>
+
+        {/* Action row */}
+        <div className="flex gap-3 mb-8">
+          <button
+            onClick={() => setShowShare(true)}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-[var(--color-border)] text-[var(--color-ink)] font-semibold text-sm active:bg-[var(--color-surface)] transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            </svg>
+            {tr(t.prayer.share, lang)}
+          </button>
+
+          <Link
+            href="/signup"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--color-navy)]/5 text-[var(--color-navy)] font-semibold text-sm active:bg-[var(--color-navy)]/10 transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 01-3.46 0" />
+            </svg>
+            {lang === "id" ? "Ingatkan saya" : "Remind me"}
+          </Link>
+        </div>
+
+        {/* People group details */}
+        <div className="border-t border-[var(--color-border)] pt-5 mb-4">
+          <h3 className="text-xs font-bold tracking-widest text-[var(--color-muted)] uppercase mb-3">
+            {lang === "id" ? "TENTANG SUKU INI" : "ABOUT THIS PEOPLE"}
+          </h3>
+
+          <dl className="flex flex-col gap-2">
+            {[
+              {
+                label: tr(t.prayer.bibleAccess, lang),
+                value:
+                  lang === "id"
+                    ? PRAYER_DATA.bibleAccessId
+                    : PRAYER_DATA.bibleAccessEn,
+              },
+              {
+                label: tr(t.prayer.believers, lang),
+                value:
+                  lang === "id"
+                    ? PRAYER_DATA.believersId
+                    : PRAYER_DATA.believersEn,
+              },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="flex items-start justify-between gap-4"
+              >
+                <dt className="text-[var(--color-muted)] text-sm">{label}</dt>
+                <dd className="text-[var(--color-ink)] text-sm font-medium text-right">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <a
+            href={PRAYER_DATA.jpUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 block text-sm text-[var(--color-terra)] font-semibold"
+          >
+            {tr(t.prayer.learnMore, lang)}
+          </a>
+        </div>
+
+        {/* Give nudge — subtle, below the fold */}
+        <div className="mt-2 mb-2 p-4 rounded-xl bg-[var(--color-navy)]/4">
+          <p className="text-sm text-[var(--color-muted)] leading-relaxed">
+            {tr(t.prayer.give, lang)}{" "}
+            <a
+              href="https://jala-transformasi.net/donate"
+              className="text-[var(--color-terra)] font-semibold"
+            >
+              {lang === "id" ? "Dukung JATI →" : "Support JATI →"}
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <BottomNav />
+
+      {showShare && (
+        <ShareSheet
+          groupName={groupName}
+          onClose={() => setShowShare(false)}
+        />
+      )}
+    </div>
+  );
+}
