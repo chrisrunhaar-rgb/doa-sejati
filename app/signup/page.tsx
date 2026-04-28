@@ -196,12 +196,6 @@ export default function SignupPage() {
             <h2 className="font-display text-2xl font-bold text-white mb-2">
               {lang === "id" ? "Siapa namamu?" : "What's your name?"}
             </h2>
-            <p className="text-white/60 text-sm mb-6">
-              {lang === "id"
-                ? "Nama kamu akan muncul di streak dan tim doa kamu."
-                : "Your name will appear in your streak and prayer teams."}
-            </p>
-
             <input
               ref={nameRef}
               type="text"
