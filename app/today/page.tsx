@@ -109,6 +109,7 @@ export default function TodayPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageToggle variant="white" />
             <Link
               href="/profile"
               className="text-white/60 hover:text-white/90 transition-colors p-1"
@@ -119,7 +120,6 @@ export default function TodayPage() {
                 <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
               </svg>
             </Link>
-            <LanguageToggle variant="white" />
           </div>
         </div>
 
