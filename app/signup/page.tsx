@@ -107,7 +107,10 @@ export default function SignupPage() {
       const userId = authData.user.id;
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      // 2. Get push subscription if available
+      // 2. Generate a user token for API auth
+      const userToken = crypto.randomUUID();
+
+      // 3. Get push subscription if available
       let pushToken: object | null = null;
       if ("serviceWorker" in navigator) {
         try {
@@ -119,17 +122,19 @@ export default function SignupPage() {
         }
       }
 
-      // 3. Save profile to ds_users
+      // 4. Save profile to ds_users
       await saveUserProfile(userId, {
         name: form.name,
         language: form.language,
         notification_time: form.notifTime,
         timezone,
         push_token: pushToken,
+        user_token: userToken,
       });
 
-      // 4. Persist userId for session
+      // 5. Persist userId and token for session
       localStorage.setItem("ds_user_id", userId);
+      localStorage.setItem("ds_user_token", userToken);
     } catch {
       // Auth or save failed — still proceed to app (offline-tolerant)
     }

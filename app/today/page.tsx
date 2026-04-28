@@ -40,11 +40,19 @@ export default function TodayPage() {
       setPrayerCount(todayCount);
       setThirtyDayCount(thirtyCount);
 
-      // Check if already prayed today
       const userId = localStorage.getItem("ds_user_id");
-      if (userId && todayContent) {
-        const already = await hasPrayedToday(userId, todayContent.id);
-        setHasPrayed(already);
+      if (userId) {
+        // Load current streak from profile
+        const profileRes = await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`);
+        if (profileRes.ok) {
+          const { profile } = await profileRes.json();
+          if (profile?.streak_count) setStreakDays(profile.streak_count);
+        }
+        // Check if already prayed today
+        if (todayContent) {
+          const already = await hasPrayedToday(userId, todayContent.id);
+          setHasPrayed(already);
+        }
       }
       setLoading(false);
     }
@@ -54,10 +62,10 @@ export default function TodayPage() {
   const handlePrayed = async () => {
     const userId = localStorage.getItem("ds_user_id");
     if (userId && content) {
-      await recordPrayer(userId, content.id);
+      const result = await recordPrayer(userId, content.id);
+      if (result.streak) setStreakDays(result.streak);
     }
     setPrayerCount((n) => n + 1);
-    setStreakDays((n) => n + 1);
     setHasPrayed(true);
   };
 
@@ -222,7 +230,7 @@ export default function TodayPage() {
         </div>
 
         {/* Joshua Project attribution — required by their terms of use */}
-        <p className="text-[10px] text-[var(--color-muted)] text-center mb-4">
+        <p className="text-[10px] text-[var(--color-muted)] text-center mb-1">
           {lang === "id" ? "Data suku dari" : "People group data from"}{" "}
           <a
             href="https://www.joshuaproject.net"
@@ -232,6 +240,11 @@ export default function TodayPage() {
           >
             Joshua Project
           </a>
+        </p>
+        <p className="text-[10px] text-[var(--color-muted)] text-center mb-4">
+          {lang === "id"
+            ? "Doa Sejati · Sebuah proyek dari JATI — Yayasan Jala Transformasi Indonesia"
+            : "Doa Sejati · A project of JATI — Yayasan Jala Transformasi Indonesia"}
         </p>
 
         {/* Action row */}

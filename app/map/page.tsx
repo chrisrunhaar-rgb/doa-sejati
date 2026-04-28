@@ -293,6 +293,11 @@ export default function MapPage() {
             ? "Lokasi berdasarkan IP · 90 hari terakhir"
             : "Location via IP address · Last 90 days"}
         </p>
+        <p className="text-center text-[var(--color-muted)] text-[10px] mt-2">
+          {lang === "id"
+            ? "Doa Sejati · Sebuah proyek dari JATI — Yayasan Jala Transformasi Indonesia"
+            : "Doa Sejati · A project of JATI — Yayasan Jala Transformasi Indonesia"}
+        </p>
       </div>
     </div>
   );

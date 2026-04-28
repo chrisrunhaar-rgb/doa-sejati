@@ -110,6 +110,12 @@ export default function LandingPage() {
               {lang === "id" ? "Bergabung dengan gerakan →" : "Join the movement →"}
             </Link>
           </div>
+
+          <p className="text-white/30 text-[10px] mt-6">
+            {lang === "id"
+              ? "Doa Sejati · Sebuah proyek dari JATI — Yayasan Jala Transformasi Indonesia"
+              : "Doa Sejati · A project of JATI — Yayasan Jala Transformasi Indonesia"}
+          </p>
         </div>
       </section>
     </div>

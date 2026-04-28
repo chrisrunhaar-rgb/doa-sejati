@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useLang } from "./LanguageContext";
 import { t, tr } from "@/lib/i18n";
 
@@ -15,7 +16,7 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
 
   const message = t.share.message[lang](groupName);
   const url = "https://doasejati.net";
-  const fullMessage = `${message}\n${url}`;
+  const fullMessage = message;
 
   const shareWhatsApp = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(fullMessage)}`, "_blank");
@@ -48,9 +49,22 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
       >
         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
 
-        <h3 className="font-bold text-lg text-[var(--color-navy)] mb-4">
-          {tr(t.share.title, lang)}
-        </h3>
+        {/* DS logo + group name */}
+        <div className="flex items-center gap-3 mb-5 p-3 rounded-2xl bg-[var(--color-navy-deep)]">
+          <Image
+            src="/icons/logo-ds-white.png"
+            alt="Doa Sejati"
+            width={40}
+            height={40}
+            className="flex-shrink-0"
+          />
+          <div>
+            <div className="text-white/50 text-[10px] uppercase tracking-widest font-semibold">
+              {lang === "id" ? "Hari ini saya berdoa untuk" : "Today I prayed for"}
+            </div>
+            <div className="text-white font-bold text-sm leading-tight">{groupName}</div>
+          </div>
+        </div>
 
         <div className="flex gap-3 mb-4">
           {/* WhatsApp */}

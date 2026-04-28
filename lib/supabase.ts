@@ -81,9 +81,10 @@ export interface DSPrayerTeam {
   created_at: string;
 }
 
-// Helper: get today's prayer content
+// Helper: get today's prayer content (uses WIB = UTC+7 so content flips at midnight Jakarta time)
 export async function getTodayPrayerContent(): Promise<DSPrayerContent | null> {
-  const today = new Date().toISOString().split("T")[0];
+  const wib = new Date(Date.now() + 7 * 3600 * 1000);
+  const today = wib.toISOString().split("T")[0];
   const { data, error } = await supabase
     .from("ds_prayer_content")
     .select("*, people_group:ds_people_groups(*)")
@@ -112,13 +113,19 @@ export async function getTodayPrayerCount(
 export async function recordPrayer(
   userId: string,
   contentId: string
-): Promise<boolean> {
+): Promise<{ ok: boolean; streak?: number }> {
+  const userToken = typeof window !== "undefined" ? localStorage.getItem("ds_user_token") : null;
   const res = await fetch("/api/prayer", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(userToken && { "x-user-token": userToken }),
+    },
     body: JSON.stringify({ userId, contentId }),
   });
-  return res.ok;
+  if (!res.ok) return { ok: false };
+  const data = await res.json();
+  return { ok: true, streak: data.streak };
 }
 
 // Helper: check if user has already prayed today
@@ -158,6 +165,7 @@ export async function saveUserProfile(
     notification_time: string;
     timezone: string;
     push_token: object | null;
+    user_token?: string;
   }
 ): Promise<boolean> {
   const { error } = await supabase.from("ds_users").upsert(
@@ -223,9 +231,14 @@ export async function getIslandStats(): Promise<DSIslandStat[]> {
 
 // Helper: delete all user data and sign out
 export async function deleteAccount(userId: string): Promise<boolean> {
-  await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`, { method: "DELETE" });
+  const userToken = localStorage.getItem("ds_user_token");
+  await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`, {
+    method: "DELETE",
+    headers: { ...(userToken && { "x-user-token": userToken }) },
+  });
   await supabase.auth.signOut();
   localStorage.removeItem("ds_user_id");
+  localStorage.removeItem("ds_user_token");
   return true;
 }
 
@@ -234,9 +247,13 @@ export async function updateUserProfile(
   userId: string,
   updates: { name?: string; notification_time?: string; language?: "id" | "en" }
 ): Promise<boolean> {
+  const userToken = typeof window !== "undefined" ? localStorage.getItem("ds_user_token") : null;
   const res = await fetch("/api/profile", {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(userToken && { "x-user-token": userToken }),
+    },
     body: JSON.stringify({ userId, updates }),
   });
   return res.ok;

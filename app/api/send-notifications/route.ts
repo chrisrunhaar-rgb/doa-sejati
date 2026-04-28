@@ -17,8 +17,9 @@ export async function GET(request: Request) {
 
   const supabase = createServiceClient();
 
-  // Get today's prayer content
-  const today = new Date().toISOString().split("T")[0];
+  // Get today's prayer content (WIB = UTC+7)
+  const wib = new Date(Date.now() + 7 * 3600 * 1000);
+  const today = wib.toISOString().split("T")[0];
   const { data: content } = await supabase
     .from("ds_prayer_content")
     .select("*, people_group:ds_people_groups(name_id, name_en)")
@@ -29,20 +30,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ sent: 0, reason: "no content today" });
   }
 
-  // Current time in HH:MM (UTC — users' notification_time should be stored in their local time)
-  // For MVP: compare against UTC time; refine to per-timezone later
-  const now = new Date();
-  const hhmm = `${String(now.getUTCHours()).padStart(2, "0")}:${String(now.getUTCMinutes()).padStart(2, "0")}`;
-
-  // Get users due for notification now (within the current minute)
+  // Send to ALL users with a push token (cron runs at 00:00 UTC = 07:00 WIB)
+  // Per-minute per-user scheduling requires Vercel Pro — upgrade when ready
   const { data: users } = await supabase
     .from("ds_users")
     .select("id, push_token, language, notification_time")
-    .not("push_token", "is", null)
-    .eq("notification_time", hhmm);
+    .not("push_token", "is", null);
 
   if (!users || users.length === 0) {
-    return NextResponse.json({ sent: 0, time: hhmm });
+    return NextResponse.json({ sent: 0 });
   }
 
   let sent = 0;
@@ -74,5 +70,5 @@ export async function GET(request: Request) {
     })
   );
 
-  return NextResponse.json({ sent, errors: errors.slice(0, 5), time: hhmm });
+  return NextResponse.json({ sent, errors: errors.slice(0, 5), time: today });
 }

@@ -77,9 +77,9 @@ export const t = {
     copied: { id: "Tersalin!", en: "Copied!" },
     message: {
       id: (group: string) =>
-        `Hari ini saya berdoa untuk ${group}. Bergabunglah bersama saya di doasejati.net`,
+        `🙏 Hari ini saya berdoa untuk suku ${group}.\n\nBergabunglah dalam gerakan transformasi melalui doa — apakah kamu ikut?\n\n👉 doasejati.net`,
       en: (group: string) =>
-        `Today I prayed for the ${group}. Join me at doasejati.net`,
+        `🙏 Today I prayed for the ${group} people.\n\nJoin a movement of transformation through prayer — are you in?\n\n👉 doasejati.net`,
     },
   },
 

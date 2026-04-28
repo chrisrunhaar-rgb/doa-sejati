@@ -9,6 +9,20 @@ export async function POST(req: Request) {
 
   const supabase = createServiceClient();
 
+  // Verify user token when provided (new accounts always have one)
+  const userToken = req.headers.get("x-user-token");
+  if (userToken) {
+    const { data: tokenCheck } = await supabase
+      .from("ds_users")
+      .select("id")
+      .eq("id", userId)
+      .eq("user_token", userToken)
+      .single();
+    if (!tokenCheck) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
   // Ensure user row exists (FK constraint on prayer_logs)
   await supabase.from("ds_users").upsert(
     { id: userId, language: "id", notification_time: "07:00", timezone: "Asia/Jakarta" },

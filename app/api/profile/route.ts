@@ -1,6 +1,18 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
 
+async function verifyToken(req: Request, userId: string, supabase: ReturnType<typeof createServiceClient>): Promise<boolean> {
+  const userToken = req.headers.get("x-user-token");
+  if (!userToken) return true; // legacy accounts without token — allow through
+  const { data } = await supabase
+    .from("ds_users")
+    .select("id")
+    .eq("id", userId)
+    .eq("user_token", userToken)
+    .single();
+  return !!data;
+}
+
 // GET /api/profile?userId=...
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -23,6 +35,10 @@ export async function PATCH(req: Request) {
   if (!userId) return NextResponse.json({ error: "missing userId" }, { status: 400 });
 
   const supabase = createServiceClient();
+  if (!(await verifyToken(req, userId, supabase))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { error } = await supabase
     .from("ds_users")
     .upsert({ id: userId, ...updates }, { onConflict: "id" });
@@ -37,6 +53,10 @@ export async function DELETE(req: Request) {
   if (!userId) return NextResponse.json({ error: "missing userId" }, { status: 400 });
 
   const supabase = createServiceClient();
+  if (!(await verifyToken(req, userId, supabase))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   await supabase.from("ds_prayer_logs").delete().eq("user_id", userId);
   await supabase.from("ds_users").delete().eq("id", userId);
 
