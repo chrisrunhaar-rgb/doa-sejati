@@ -178,13 +178,45 @@ export async function getThirtyDayCount(): Promise<number> {
   return count ?? 0;
 }
 
-// Helper: get today's total prayer count
+// Helper: get today's total prayer count (reads directly from logs)
 export async function getTodayTotalCount(): Promise<number> {
-  const today = new Date().toISOString().split("T")[0];
-  const { data } = await supabase
-    .from("ds_upg_daily_counts")
-    .select("prayer_count")
-    .eq("date", today);
-  if (!data) return 0;
-  return data.reduce((sum, r) => sum + r.prayer_count, 0);
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  const { count } = await supabase
+    .from("ds_prayer_logs")
+    .select("id", { count: "exact", head: true })
+    .gte("prayed_at", today.toISOString())
+    .lt("prayed_at", tomorrow.toISOString());
+  return count ?? 0;
+}
+
+// Helper: get a user's profile from ds_users
+export async function getUserProfile(userId: string): Promise<DSUser | null> {
+  const { data, error } = await supabase
+    .from("ds_users")
+    .select("*")
+    .eq("id", userId)
+    .single();
+  if (error || !data) return null;
+  return data as DSUser;
+}
+
+// Helper: get total prayers logged by a user
+export async function getUserTotalPrayed(userId: string): Promise<number> {
+  const { count } = await supabase
+    .from("ds_prayer_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+  return count ?? 0;
+}
+
+// Helper: update notification time and/or language for a user
+export async function updateUserProfile(
+  userId: string,
+  updates: { notification_time?: string; language?: "id" | "en" }
+): Promise<boolean> {
+  const { error } = await supabase.from("ds_users").update(updates).eq("id", userId);
+  return !error;
 }

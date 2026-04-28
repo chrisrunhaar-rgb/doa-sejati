@@ -56,8 +56,10 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className="min-h-full bg-[var(--color-cream)] antialiased">
-        <LanguageProvider>{children}</LanguageProvider>
+      <body className="min-h-full bg-[var(--color-navy-deep)] antialiased">
+        <div className="max-w-md mx-auto min-h-screen bg-[var(--color-cream)]">
+          <LanguageProvider>{children}</LanguageProvider>
+        </div>
         <script
           dangerouslySetInnerHTML={{
             __html: `if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); }); }`,

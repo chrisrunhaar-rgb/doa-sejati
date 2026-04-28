@@ -29,14 +29,14 @@ export default function LandingPage() {
             backgroundImage: "url('/prayer-map.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center 40%",
-            opacity: 0.40,
+            opacity: 0.70,
           }}
         />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(to bottom, oklch(14% 0.07 258 / 0.55) 0%, oklch(14% 0.07 258 / 0.25) 35%, oklch(14% 0.07 258 / 0.88) 100%)",
+              "linear-gradient(to bottom, oklch(14% 0.07 258 / 0.35) 0%, oklch(14% 0.07 258 / 0.10) 40%, oklch(14% 0.07 258 / 0.80) 100%)",
           }}
         />
 

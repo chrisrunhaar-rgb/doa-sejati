@@ -1,28 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLang } from "@/components/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import { t, tr } from "@/lib/i18n";
-
-// Mock data — replace with Supabase user data
-const MOCK_USER = {
-  email: null,
-  streakCount: 0,
-  totalPrayed: 0,
-  notifTime: "07:00",
-  memberSince: "April 2026",
-};
+import {
+  getUserProfile,
+  getUserTotalPrayed,
+  updateUserProfile,
+  type DSUser,
+} from "@/lib/supabase";
 
 export default function ProfilePage() {
   const { lang } = useLang();
-  const [notifTime, setNotifTime] = useState(MOCK_USER.notifTime);
+  const [user, setUser] = useState<DSUser | null>(null);
+  const [totalPrayed, setTotalPrayed] = useState(0);
+  const [notifTime, setNotifTime] = useState("07:00");
+  const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const handleSave = () => {
-    // In production: update Supabase user record
+  useEffect(() => {
+    async function load() {
+      const userId = localStorage.getItem("ds_user_id");
+      if (!userId) { setLoading(false); return; }
+      const [profile, total] = await Promise.all([
+        getUserProfile(userId),
+        getUserTotalPrayed(userId),
+      ]);
+      if (profile) {
+        setUser(profile);
+        setNotifTime(profile.notification_time || "07:00");
+      }
+      setTotalPrayed(total);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const userName = user?.name || "";
+  const streakCount = user?.streak_count || 0;
+  const memberSince = user
+    ? new Date(user.created_at).toLocaleDateString(
+        lang === "id" ? "id-ID" : "en-GB",
+        { month: "long", year: "numeric" }
+      )
+    : "";
+
+  const handleSave = async () => {
+    const userId = localStorage.getItem("ds_user_id");
+    if (userId) {
+      await updateUserProfile(userId, { notification_time: notifTime, language: lang });
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -31,28 +61,58 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[var(--color-cream)] flex flex-col">
       {/* Header */}
       <div className="bg-[var(--color-navy-deep)] px-5 pt-safe pt-4 pb-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <Link href="/" className="text-white/60 hover:text-white/90 p-1">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </Link>
           <h1 className="font-display text-xl font-bold text-white">
             {tr(t.profile.title, lang)}
           </h1>
           <LanguageToggle variant="white" />
         </div>
 
+        {/* Name + member since */}
+        <div className="text-center mb-4">
+          {loading ? (
+            <div className="h-6 w-32 rounded bg-white/10 animate-pulse mx-auto mb-1" />
+          ) : (
+            <>
+              <div className="text-white text-xl font-bold font-display">
+                {userName || (lang === "id" ? "Pejuang Doa" : "Prayer Warrior")}
+              </div>
+              {memberSince && (
+                <div className="text-white/40 text-xs mt-0.5">
+                  {lang === "id" ? `Bergabung ${memberSince}` : `Joined ${memberSince}`}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
         {/* Stats */}
         <div className="flex gap-4">
           <div className="flex-1 bg-white/10 rounded-2xl p-4 text-center">
-            <div className="font-display text-3xl font-bold text-white mb-1">
-              {MOCK_USER.streakCount}
-              {MOCK_USER.streakCount > 0 && " 🔥"}
-            </div>
+            {loading ? (
+              <div className="h-9 w-12 rounded bg-white/10 animate-pulse mx-auto mb-1" />
+            ) : (
+              <div className="font-display text-3xl font-bold text-white mb-1">
+                {streakCount}{streakCount > 0 && " 🔥"}
+              </div>
+            )}
             <div className="text-white/60 text-xs uppercase tracking-wider">
               {tr(t.profile.prayerStreak, lang)}
             </div>
           </div>
           <div className="flex-1 bg-white/10 rounded-2xl p-4 text-center">
-            <div className="font-display text-3xl font-bold text-white mb-1">
-              {MOCK_USER.totalPrayed}
-            </div>
+            {loading ? (
+              <div className="h-9 w-12 rounded bg-white/10 animate-pulse mx-auto mb-1" />
+            ) : (
+              <div className="font-display text-3xl font-bold text-white mb-1">
+                {totalPrayed}
+              </div>
+            )}
             <div className="text-white/60 text-xs uppercase tracking-wider">
               {tr(t.profile.totalPrayed, lang)}
             </div>
@@ -61,22 +121,19 @@ export default function ProfilePage() {
       </div>
 
       {/* Settings */}
-      <div className="flex-1 px-5 pt-6 pb-nav mb-nav">
+      <div className="flex-1 px-5 pt-6 pb-10">
         <div className="bg-white rounded-2xl overflow-hidden mb-4">
           {/* Reminder time */}
           <div className="px-4 py-4">
             <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider block mb-2">
               {tr(t.profile.notifTime, lang)}
             </label>
-            <select
+            <input
+              type="time"
               value={notifTime}
               onChange={(e) => setNotifTime(e.target.value)}
-              className="w-full bg-[var(--color-surface)] rounded-xl px-3 py-2.5 text-[var(--color-ink)] font-semibold focus:outline-none"
-            >
-              <option value="07:00">🌅 {tr(t.signup.morning, lang)}</option>
-              <option value="12:00">☀️ {tr(t.signup.noon, lang)}</option>
-              <option value="20:00">🌙 {tr(t.signup.evening, lang)}</option>
-            </select>
+              className="w-full bg-[var(--color-surface)] rounded-xl px-3 py-2.5 text-[var(--color-ink)] font-semibold focus:outline-none [color-scheme:light]"
+            />
           </div>
 
           <div className="border-t border-[var(--color-border)] mx-4" />
@@ -123,7 +180,6 @@ export default function ProfilePage() {
           </Link>
         </div>
 
-        {/* Delete account */}
         {!showDeleteConfirm ? (
           <button
             onClick={() => setShowDeleteConfirm(true)}
@@ -155,7 +211,6 @@ export default function ProfilePage() {
           <p className="font-semibold">JATI — Yayasan Jala Transformasi Indonesia</p>
         </div>
       </div>
-
     </div>
   );
 }
