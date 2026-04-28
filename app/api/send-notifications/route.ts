@@ -2,14 +2,13 @@ import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { createServiceClient } from "@/lib/supabase";
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
-
-// Called by Vercel Cron every minute — sends pushes to users whose notif_time matches now
+// Called by Vercel Cron — sends pushes to users whose notif_time matches now
 export async function GET(request: Request) {
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  );
   // Verify cron secret to prevent public triggers
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
