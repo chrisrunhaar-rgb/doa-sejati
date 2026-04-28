@@ -32,9 +32,11 @@ export default function SignupPage() {
   const [notifGranted, setNotifGranted] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
   const [installed, setInstalled] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
 
-  // Capture PWA install prompt
+  // Capture PWA install prompt (Android Chrome)
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
@@ -42,6 +44,16 @@ export default function SignupPage() {
     };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  // Platform detection
+  useEffect(() => {
+    setIsIOS(/iphone|ipad|ipod/i.test(navigator.userAgent));
+    setIsStandalone(
+      window.matchMedia("(display-mode: standalone)").matches ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (navigator as any).standalone === true
+    );
   }, []);
 
   const handleLanguageChoice = (l: Lang) => {
@@ -307,21 +319,46 @@ export default function SignupPage() {
 
         {step === 5 && (
           <div className="animate-float-in">
-            {/* Install prompt — show if available */}
-            {installPrompt && !installed && (
+            {/* Install section — platform-aware */}
+            {isStandalone || installed ? (
+              <div className="mb-6 p-4 rounded-2xl bg-[var(--color-prayed)]/20 border border-[var(--color-prayed)]/30 text-center">
+                <div className="text-3xl mb-2">✅</div>
+                <p className="text-white font-semibold">
+                  {lang === "id" ? "Aplikasi terpasang!" : "App installed!"}
+                </p>
+              </div>
+            ) : isIOS ? (
+              /* iOS: no beforeinstallprompt — show manual steps */
               <div className="mb-6 p-4 rounded-2xl bg-white/8 border border-white/10">
                 <div className="flex items-center gap-3 mb-3">
-                  <Image
-                    src="/icons/logo.png"
-                    alt=""
-                    width={40}
-                    height={40}
-                    className="rounded-xl"
-                  />
+                  <Image src="/icons/logo-ds.jpg" alt="" width={40} height={40} className="rounded-xl" />
                   <div>
-                    <div className="font-bold text-white text-sm">
-                      Doa Sejati
-                    </div>
+                    <div className="font-bold text-white text-sm">Doa Sejati</div>
+                    <div className="text-white/50 text-xs">doasejati.net</div>
+                  </div>
+                </div>
+                <h3 className="font-display text-xl font-bold text-white mb-1">
+                  {lang === "id" ? "Pasang di iPhone kamu" : "Add to your iPhone"}
+                </h3>
+                <ol className="flex flex-col gap-2 mt-3">
+                  {(lang === "id"
+                    ? ["Tap ikon Bagikan (kotak panah ke atas) di bawah Safari", "Scroll dan pilih Tambahkan ke Layar Utama", "Tap Tambahkan di pojok kanan atas"]
+                    : ["Tap the Share icon (box with arrow) at the bottom of Safari", "Scroll down and tap Add to Home Screen", "Tap Add in the top right corner"]
+                  ).map((step, i) => (
+                    <li key={i} className="flex gap-3 items-start">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/15 text-white text-xs font-bold flex items-center justify-center">{i + 1}</span>
+                      <span className="text-white/70 text-sm leading-snug">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : installPrompt ? (
+              /* Android Chrome: native install prompt */
+              <div className="mb-6 p-4 rounded-2xl bg-white/8 border border-white/10">
+                <div className="flex items-center gap-3 mb-3">
+                  <Image src="/icons/logo-ds.jpg" alt="" width={40} height={40} className="rounded-xl" />
+                  <div>
+                    <div className="font-bold text-white text-sm">Doa Sejati</div>
                     <div className="text-white/50 text-xs">doasejati.net</div>
                   </div>
                 </div>
@@ -344,18 +381,7 @@ export default function SignupPage() {
                   {tr(t.signup.laterBtn, lang)}
                 </button>
               </div>
-            )}
-
-            {installed && (
-              <div className="mb-6 p-4 rounded-2xl bg-[var(--color-prayed)]/20 border border-[var(--color-prayed)]/30 text-center">
-                <div className="text-3xl mb-2">✅</div>
-                <p className="text-white font-semibold">
-                  {lang === "id"
-                    ? "Aplikasi terpasang!"
-                    : "App installed!"}
-                </p>
-              </div>
-            )}
+            ) : null}
 
             {/* Consent + start */}
             <div className="mt-4">
