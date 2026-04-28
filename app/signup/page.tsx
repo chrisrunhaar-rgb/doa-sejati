@@ -150,18 +150,13 @@ export default function SignupPage() {
 
       {/* Logo */}
       <div className="flex justify-center py-6">
-        <div className="text-center">
-          <Image
-            src="/icons/logo-ds.jpg"
-            alt="Doa Sejati"
-            width={60}
-            height={60}
-            className="mx-auto mb-3 rounded-xl object-cover"
-          />
-          <h1 className="font-display text-2xl font-bold text-white">
-            Doa Sejati
-          </h1>
-        </div>
+        <Image
+          src="/icons/logo-white.png"
+          alt="Doa Sejati"
+          width={120}
+          height={120}
+          className="mx-auto"
+        />
       </div>
 
       {/* Step content */}
@@ -182,20 +177,14 @@ export default function SignupPage() {
                 className="flex items-center gap-4 p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 transition-colors"
               >
                 <span className="text-3xl">🇮🇩</span>
-                <div className="text-left">
-                  <div className="font-bold text-white">Bahasa Indonesia</div>
-                  <div className="text-white/50 text-sm">Bahasa utama</div>
-                </div>
+                <div className="font-bold text-white">Bahasa Indonesia</div>
               </button>
               <button
                 onClick={() => handleLanguageChoice("en")}
                 className="flex items-center gap-4 p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 transition-colors"
               >
                 <span className="text-3xl">🇬🇧</span>
-                <div className="text-left">
-                  <div className="font-bold text-white">English</div>
-                  <div className="text-white/50 text-sm">Secondary language</div>
-                </div>
+                <div className="font-bold text-white">English</div>
               </button>
             </div>
           </div>
