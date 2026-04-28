@@ -108,7 +108,7 @@ export async function getTodayPrayerCount(
   return data?.prayer_count ?? 0;
 }
 
-// Helper: record a prayer
+// Helper: record a prayer and update streak
 export async function recordPrayer(
   userId: string,
   contentId: string
@@ -118,7 +118,31 @@ export async function recordPrayer(
     content_id: contentId,
     prayed_at: new Date().toISOString(),
   });
-  return !error;
+  if (error) return false;
+
+  // Update streak
+  const today = new Date().toISOString().split("T")[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+
+  const { data: profile } = await supabase
+    .from("ds_users")
+    .select("streak_count, streak_last_date")
+    .eq("id", userId)
+    .single();
+
+  if (profile?.streak_last_date === today) return true; // already counted
+
+  const newStreak =
+    profile?.streak_last_date === yesterday
+      ? (profile.streak_count || 0) + 1
+      : 1;
+
+  await supabase
+    .from("ds_users")
+    .update({ streak_count: newStreak, streak_last_date: today, last_prayed_at: new Date().toISOString() })
+    .eq("id", userId);
+
+  return true;
 }
 
 // Helper: check if user has already prayed today
