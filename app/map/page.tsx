@@ -12,35 +12,86 @@ import {
   type DSIslandStat,
 } from "@/lib/supabase";
 
-// Simplified island shapes for the Indonesia archipelago
-// Each shape: { id, label, cx, cy, rx, ry, rotate } — ellipse-based
-// Positioned in a 500×280 viewBox
-const ISLAND_SHAPES: {
-  id: string;
-  labelEn: string;
-  labelId: string;
-  cx: number;
-  cy: number;
-  rx: number;
-  ry: number;
-  rotate?: number;
-  textY?: number;
-}[] = [
-  { id: "Sumatera",      labelEn: "Sumatra",       labelId: "Sumatera",      cx: 68,  cy: 130, rx: 20, ry: 62, rotate: -18, textY: 202 },
-  { id: "Jawa",          labelEn: "Java",           labelId: "Jawa",          cx: 185, cy: 200, rx: 68, ry: 16, rotate: 2,   textY: 224 },
-  { id: "Kalimantan",    labelEn: "Kalimantan",     labelId: "Kalimantan",    cx: 210, cy: 110, rx: 52, ry: 56, rotate: 0,   textY: 170 },
-  { id: "Bali",          labelEn: "Bali",           labelId: "Bali",          cx: 260, cy: 200, rx: 10, ry: 9,  rotate: 0,   textY: 216 },
-  { id: "Nusa Tenggara", labelEn: "Nusa Tenggara",  labelId: "Nusa Tenggara", cx: 312, cy: 212, rx: 38, ry: 11, rotate: 3,   textY: 232 },
-  { id: "Sulawesi",      labelEn: "Sulawesi",       labelId: "Sulawesi",      cx: 330, cy: 120, rx: 22, ry: 52, rotate: 5,   textY: 180 },
-  { id: "Maluku",        labelEn: "Maluku",         labelId: "Maluku",        cx: 390, cy: 148, rx: 14, ry: 42, rotate: 8,   textY: 198 },
-  { id: "Indonesia",     labelEn: "National",       labelId: "Nasional",      cx: 150, cy: 148, rx: 18, ry: 12, rotate: 0,   textY: 168 },
-];
+// Polygon points derived from geographic coordinates:
+// ViewBox 700×220, x = (lon−95)×700/46, y = (7−lat)×220/18
+const ISLANDS = [
+  {
+    id: "Sumatera",
+    labelEn: "Sumatra",
+    labelId: "Sumatera",
+    // clockwise: NE coast (Malacca Strait side) then SW coast (Indian Ocean)
+    points:
+      "8,18 30,27 53,37 76,55 99,73 122,92 145,116 167,156 " +
+      "155,156 129,141 107,122 84,104 61,86 38,61 15,43",
+    cx: 88,
+    cy: 97,
+  },
+  {
+    id: "Jawa",
+    labelEn: "Java",
+    labelId: "Jawa",
+    points:
+      "167,157 198,157 229,161 259,169 290,177 305,183 308,189 " +
+      "282,183 251,179 221,172 198,169 175,165",
+    cx: 238,
+    cy: 173,
+  },
+  {
+    id: "Kalimantan",
+    labelEn: "Kalimantan",
+    labelId: "Kalimantan",
+    points:
+      "69,0 91,0 129,0 183,6 213,31 213,55 206,79 191,104 168,128 137,140 " +
+      "107,140 84,128 69,116 54,116 54,86 54,55 61,24",
+    cx: 135,
+    cy: 68,
+  },
+  {
+    id: "Sulawesi",
+    labelEn: "Sulawesi",
+    labelId: "Sulawesi",
+    // Simplified spider shape: N peninsula + E arm + S arm + W coast
+    points:
+      "374,73 403,67 441,73 453,80 441,92 435,111 449,122 457,135 " +
+      "449,141 434,135 418,153 403,153 388,147 372,135 365,122 " +
+      "372,104 374,86",
+    cx: 410,
+    cy: 108,
+  },
+  {
+    id: "Nusa Tenggara",
+    labelEn: "Nusa Tenggara",
+    labelId: "Nusa Tenggara",
+    points:
+      "308,186 328,190 351,192 382,196 404,196 426,202 462,206 " +
+      "465,202 434,190 404,190 382,190 351,186 328,183 313,184",
+    cx: 386,
+    cy: 195,
+  },
+  {
+    id: "Maluku",
+    labelEn: "Maluku",
+    labelId: "Maluku",
+    // Halmahera + surrounding — simplified blob
+    points: "482,73 496,67 511,71 518,84 512,97 496,95 482,87",
+    cx: 499,
+    cy: 82,
+  },
+  {
+    id: "Papua",
+    labelEn: "Papua",
+    labelId: "Papua",
+    points:
+      "541,91 565,79 600,67 638,61 670,67 695,79 700,98 686,122 " +
+      "655,153 624,171 590,183 562,189 541,174 534,150 534,122 541,104",
+    cx: 618,
+    cy: 122,
+  },
+] as const;
 
-// Papua is not in the UPG island list but worth showing
-const PAPUA = { cx: 455, cy: 140, rx: 34, ry: 44, rotate: 0 };
-
-const NAVY_DEEP = "oklch(14% 0.07 258)";
-const TERRA = "oklch(55% 0.13 38)";
+// Bali: tiny — render as a small labeled dot, not polygon
+const BALI_X = 311;
+const BALI_Y = 185;
 
 function formatNum(n: number) {
   if (n >= 1000) return (n / 1000).toFixed(1).replace(".0", "") + "k";
@@ -53,7 +104,6 @@ export default function MapPage() {
   const [todayCount, setTodayCount] = useState(0);
   const [islandStats, setIslandStats] = useState<DSIslandStat[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hoveredIsland, setHoveredIsland] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -70,19 +120,17 @@ export default function MapPage() {
     load();
   }, []);
 
-  const statsByIsland = Object.fromEntries(
-    islandStats.map((s) => [s.island, s])
-  );
-
+  const statsByIsland = Object.fromEntries(islandStats.map((s) => [s.island, s]));
   const todayIsland = content?.people_group?.island ?? null;
   const todayUPG = content?.people_group
-    ? lang === "id"
-      ? content.people_group.name_id
-      : content.people_group.name_en
+    ? lang === "id" ? content.people_group.name_id : content.people_group.name_en
     : null;
 
   const totalPrayers = islandStats.reduce((a, s) => a + s.total_prayers, 0);
   const totalUPGs = islandStats.reduce((a, s) => a + s.upg_count, 0);
+
+  const baliStat = statsByIsland["Bali"];
+  const baliToday = todayIsland === "Bali";
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-navy-deep)]">
@@ -99,7 +147,7 @@ export default function MapPage() {
         <LanguageToggle variant="white" />
       </div>
 
-      {/* Today's focus */}
+      {/* Today's focus banner */}
       {!loading && todayUPG && (
         <div className="mx-5 mb-4 bg-white/8 rounded-2xl px-4 py-3">
           <div className="text-white/50 text-xs uppercase tracking-wider mb-0.5">
@@ -123,121 +171,113 @@ export default function MapPage() {
       )}
 
       {/* Map */}
-      <div className="px-4 mb-2">
+      <div className="px-3 mb-1">
         <svg
-          viewBox="0 0 500 260"
+          viewBox="0 0 700 218"
           className="w-full"
-          style={{ maxHeight: 220 }}
+          style={{ maxHeight: 210 }}
           aria-label={lang === "id" ? "Peta Indonesia" : "Map of Indonesia"}
         >
           {/* Ocean background */}
-          <rect width="500" height="260" fill="oklch(18% 0.06 230)" rx="16" />
+          <rect width="700" height="218" fill="oklch(18% 0.06 230)" rx="12" />
 
-          {/* Papua (not in UPG island list) */}
-          <ellipse
-            cx={PAPUA.cx} cy={PAPUA.cy} rx={PAPUA.rx} ry={PAPUA.ry}
-            transform={`rotate(${PAPUA.rotate} ${PAPUA.cx} ${PAPUA.cy})`}
-            fill="oklch(28% 0.06 258)"
-            stroke="oklch(40% 0.08 258)"
-            strokeWidth="1"
-          />
-          <text x={PAPUA.cx} y={PAPUA.cy + PAPUA.ry + 12} textAnchor="middle"
-            fill="oklch(55% 0.04 258)" fontSize="8" fontFamily="sans-serif">
-            Papua
-          </text>
-
-          {/* Islands */}
-          {ISLAND_SHAPES.map((shape) => {
-            const stat = statsByIsland[shape.id];
-            const isToday = shape.id === todayIsland;
-            const isHovered = hoveredIsland === shape.id;
+          {/* Island polygons */}
+          {ISLANDS.map((island) => {
+            const stat = statsByIsland[island.id];
+            const isToday = island.id === todayIsland;
             const hasPrayers = (stat?.total_prayers ?? 0) > 0;
-
             const fill = isToday
-              ? TERRA
+              ? "oklch(55% 0.13 38)"
               : hasPrayers
-              ? "oklch(35% 0.09 258)"
-              : "oklch(28% 0.06 258)";
-
-            const stroke = isToday
-              ? "oklch(70% 0.15 38)"
-              : isHovered
-              ? "oklch(55% 0.08 258)"
-              : "oklch(38% 0.08 258)";
+              ? "oklch(33% 0.09 258)"
+              : "oklch(26% 0.07 258)";
+            const stroke = isToday ? "oklch(70% 0.15 38)" : "oklch(42% 0.08 258)";
 
             return (
-              <g
-                key={shape.id}
-                onMouseEnter={() => setHoveredIsland(shape.id)}
-                onMouseLeave={() => setHoveredIsland(null)}
-                style={{ cursor: "pointer" }}
-              >
-                <ellipse
-                  cx={shape.cx} cy={shape.cy}
-                  rx={shape.rx} ry={shape.ry}
-                  transform={`rotate(${shape.rotate ?? 0} ${shape.cx} ${shape.cy})`}
+              <g key={island.id}>
+                <polygon
+                  points={island.points}
                   fill={fill}
                   stroke={stroke}
-                  strokeWidth={isToday ? 1.5 : 1}
-                  style={{ transition: "fill 0.2s, stroke 0.2s" }}
+                  strokeWidth={isToday ? 1.5 : 0.8}
+                  style={{ transition: "fill 0.25s" }}
                 />
 
-                {/* Pulsing dot for today's island */}
+                {/* Pulsing dot for today */}
                 {isToday && (
                   <>
-                    <circle cx={shape.cx} cy={shape.cy} r="5" fill="white" opacity="0.9">
-                      <animate attributeName="r" values="4;8;4" dur="2s" repeatCount="indefinite" />
-                      <animate attributeName="opacity" values="0.9;0;0.9" dur="2s" repeatCount="indefinite" />
+                    <circle cx={island.cx} cy={island.cy} r="4" fill="white" opacity="0.85">
+                      <animate attributeName="r" values="3;9;3" dur="2.2s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.8;0;0.8" dur="2.2s" repeatCount="indefinite" />
                     </circle>
-                    <circle cx={shape.cx} cy={shape.cy} r="4" fill="white" opacity="0.95" />
+                    <circle cx={island.cx} cy={island.cy} r="3.5" fill="white" />
                   </>
                 )}
 
                 {/* Prayer count badge */}
                 {hasPrayers && (
                   <text
-                    x={shape.cx}
-                    y={shape.cy + 4}
+                    x={island.cx}
+                    y={island.cy + (isToday ? 14 : 4)}
                     textAnchor="middle"
                     fill="white"
-                    fontSize={isToday ? "10" : "8"}
+                    fontSize={isToday ? "9" : "8"}
                     fontWeight="bold"
                     fontFamily="sans-serif"
+                    opacity={isToday ? "1" : "0.8"}
                   >
                     {formatNum(stat.total_prayers)}
                   </text>
                 )}
 
-                {/* Island label below */}
+                {/* Island label */}
                 <text
-                  x={shape.cx}
-                  y={shape.textY ?? shape.cy + shape.ry + 12}
+                  x={island.cx}
+                  y={island.cy + (isToday ? 25 : 15)}
                   textAnchor="middle"
-                  fill={isToday ? "oklch(80% 0.12 38)" : "oklch(55% 0.04 258)"}
-                  fontSize="7"
+                  fill={isToday ? "oklch(82% 0.12 38)" : "oklch(58% 0.04 258)"}
+                  fontSize="6.5"
                   fontFamily="sans-serif"
+                  pointerEvents="none"
                 >
-                  {lang === "id" ? shape.labelId : shape.labelEn}
+                  {lang === "id" ? island.labelId : island.labelEn}
                 </text>
               </g>
             );
           })}
 
+          {/* Bali — tiny dot */}
+          <g>
+            <circle
+              cx={BALI_X}
+              cy={BALI_Y}
+              r={baliToday ? 5 : 4}
+              fill={baliToday ? "oklch(55% 0.13 38)" : (baliStat?.total_prayers ?? 0) > 0 ? "oklch(33% 0.09 258)" : "oklch(26% 0.07 258)"}
+              stroke={baliToday ? "oklch(70% 0.15 38)" : "oklch(42% 0.08 258)"}
+              strokeWidth="0.8"
+            />
+            <text x={BALI_X} y={BALI_Y + 13} textAnchor="middle"
+              fill="oklch(50% 0.04 258)" fontSize="6" fontFamily="sans-serif">
+              Bali
+            </text>
+          </g>
+
           {/* Legend */}
-          <circle cx="14" cy="244" r="4" fill={TERRA} />
-          <text x="22" y="248" fill="oklch(55% 0.04 258)" fontSize="7" fontFamily="sans-serif">
-            {lang === "id" ? "Fokus hari ini" : "Today's focus"}
-          </text>
-          <circle cx="100" cy="244" r="4" fill="oklch(35% 0.09 258)" />
-          <text x="108" y="248" fill="oklch(55% 0.04 258)" fontSize="7" fontFamily="sans-serif">
-            {lang === "id" ? "Sudah didoakan" : "Prayed for"}
-          </text>
+          <g transform="translate(8,205)">
+            <rect x="0" y="0" width="7" height="7" rx="1.5" fill="oklch(55% 0.13 38)" />
+            <text x="10" y="6.5" fill="oklch(58% 0.04 258)" fontSize="6.5" fontFamily="sans-serif">
+              {lang === "id" ? "Fokus hari ini" : "Today's focus"}
+            </text>
+            <rect x="80" y="0" width="7" height="7" rx="1.5" fill="oklch(33% 0.09 258)" />
+            <text x="90" y="6.5" fill="oklch(58% 0.04 258)" fontSize="6.5" fontFamily="sans-serif">
+              {lang === "id" ? "Sudah didoakan" : "Prayed for"}
+            </text>
+          </g>
         </svg>
       </div>
 
-      {/* Island breakdown */}
+      {/* Data cards */}
       <div className="flex-1 bg-[var(--color-cream)] rounded-t-3xl px-5 pt-5 pb-10">
-        {/* Summary stats */}
         <div className="flex gap-3 mb-5">
           <div className="flex-1 bg-white rounded-2xl p-4 text-center">
             <div className="font-display text-2xl font-bold text-[var(--color-navy)]">
@@ -272,7 +312,6 @@ export default function MapPage() {
                 .map((stat) => {
                   const isToday = stat.island === todayIsland;
                   const maxUPGs = Math.max(...islandStats.map((s) => s.upg_count));
-                  const barWidth = (stat.upg_count / maxUPGs) * 100;
 
                   return (
                     <div
@@ -282,7 +321,7 @@ export default function MapPage() {
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
                           {isToday && (
-                            <span className="inline-block w-2 h-2 rounded-full bg-[var(--color-terra)]" />
+                            <span className="w-2 h-2 rounded-full bg-[var(--color-terra)] flex-shrink-0" />
                           )}
                           <span className="font-semibold text-[var(--color-ink)] text-sm">
                             {stat.island}
@@ -301,10 +340,8 @@ export default function MapPage() {
                         <div
                           className="h-full rounded-full transition-all duration-500"
                           style={{
-                            width: `${barWidth}%`,
-                            background: isToday
-                              ? "var(--color-terra)"
-                              : "var(--color-navy-light)",
+                            width: `${(stat.upg_count / maxUPGs) * 100}%`,
+                            background: isToday ? "var(--color-terra)" : "var(--color-navy-light)",
                           }}
                         />
                       </div>
