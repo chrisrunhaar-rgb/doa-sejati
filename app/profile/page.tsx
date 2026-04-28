@@ -26,7 +26,7 @@ export default function ProfilePage() {
   useEffect(() => {
     async function load() {
       const userId = localStorage.getItem("ds_user_id");
-      if (!userId) { setLoading(false); return; }
+      if (!userId) { router.replace("/signup"); return; }
       const res = await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`);
       if (res.ok) {
         const { profile, totalPrayed } = await res.json();

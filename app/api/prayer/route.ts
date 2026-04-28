@@ -15,6 +15,26 @@ export async function POST(req: Request) {
     { onConflict: "id", ignoreDuplicates: true }
   );
 
+  // Geolocate from IP on first prayer (sets province for leaderboard)
+  const { data: existingUser } = await supabase
+    .from("ds_users").select("province").eq("id", userId).single();
+  if (!existingUser?.province) {
+    const forwarded = req.headers.get("x-forwarded-for");
+    const ip = forwarded ? forwarded.split(",")[0].trim() : null;
+    if (ip && ip !== "127.0.0.1" && ip !== "::1") {
+      try {
+        const geo = await fetch(`https://ipapi.co/${ip}/json/`, {
+          signal: AbortSignal.timeout(3000),
+        }).then((r) => r.json());
+        if (geo?.country_code === "ID" && geo?.region) {
+          await supabase.from("ds_users").update({ province: geo.region }).eq("id", userId);
+        }
+      } catch {
+        // geolocation failed — continue without province
+      }
+    }
+  }
+
   // Insert prayer log (unique constraint: one per user+content)
   const { error: logError } = await supabase.from("ds_prayer_logs").insert({
     user_id: userId,
