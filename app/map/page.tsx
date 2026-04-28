@@ -135,31 +135,33 @@ export default function MapPage() {
     <div className="min-h-screen flex flex-col bg-[var(--color-navy-deep)]">
       {/* Header with photo background */}
       <div
-        className="relative px-5 pt-safe pt-4 pb-6"
+        className="relative px-5 pt-safe pt-4 pb-8"
         style={{
           backgroundImage: "url('/header-prayer.jpg')",
           backgroundSize: "cover",
-          backgroundPosition: "center top",
+          backgroundPosition: "center",
+          minHeight: "200px",
         }}
       >
-        {/* Dark overlay for text legibility */}
-        <div className="absolute inset-0 bg-[var(--color-navy-deep)]/70" />
+        {/* Overlay — lighter so the photo comes through */}
+        <div className="absolute inset-0 bg-[var(--color-navy-deep)]/50" />
 
-        <div className="relative flex items-center justify-between mb-4">
-          <Link href="/today" className="text-white/60 hover:text-white/90 p-1">
+        <div className="relative flex items-center justify-between mb-6">
+          <Link href="/today" className="text-white/70 hover:text-white p-1">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </Link>
-          <div className="text-center">
-            <h1 className="font-display text-lg font-bold text-white">
-              {lang === "id" ? "Peta Pejuang Doa" : "Prayer Warriors"}
-            </h1>
-            <p className="text-white/50 text-[10px] uppercase tracking-wider">
-              {lang === "id" ? "Dari mana mereka berdoa" : "Where they pray from"}
-            </p>
-          </div>
           <LanguageToggle variant="white" />
+        </div>
+
+        <div className="relative text-center pb-2">
+          <h1 className="font-display text-2xl font-bold text-white drop-shadow-md">
+            {lang === "id" ? "Peta Pejuang Doa" : "Prayer Warriors"}
+          </h1>
+          <p className="text-white/70 text-[11px] uppercase tracking-widest mt-1 drop-shadow">
+            {lang === "id" ? "Dari mana mereka berdoa" : "Where they pray from"}
+          </p>
         </div>
       </div>
 
@@ -189,9 +191,15 @@ export default function MapPage() {
       <div className="flex-1 bg-[var(--color-cream)] rounded-t-3xl px-5 pt-5 pb-10">
 
         {/* Region scoreboard */}
-        <h2 className="font-display font-bold text-[var(--color-ink)] text-base mb-3">
-          {lang === "id" ? "6 Wilayah Utama" : "6 Main Regions"}
-        </h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display font-bold text-[var(--color-ink)] text-base">
+            {lang === "id" ? "6 Wilayah Utama" : "6 Main Regions"}
+          </h2>
+          <div className="flex items-center gap-3 text-[10px]">
+            <span className="text-[var(--color-terra)] font-semibold">{lang === "id" ? "● doa (90 hr)" : "● prayers (90d)"}</span>
+            <span className="text-[var(--color-navy)] font-semibold">{lang === "id" ? "● pejuang" : "● warriors"}</span>
+          </div>
+        </div>
 
         <div className="space-y-2 mb-6">
           {loading
@@ -276,56 +284,6 @@ export default function MapPage() {
                         ))}
                     </div>
                   )}
-                </div>
-              ))}
-        </div>
-
-        {/* Full province list */}
-        <h2 className="font-display font-bold text-[var(--color-ink)] text-base mb-3">
-          {lang === "id" ? "38 Provinsi" : "38 Provinces"}
-        </h2>
-
-        <div className="space-y-1.5">
-          {loading
-            ? Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="h-10 rounded-xl bg-white animate-pulse" />
-              ))
-            : REGIONS.flatMap((region) =>
-                region.provinces
-                  .map((p) => ({
-                    province: p,
-                    region: lang === "id" ? region.labelId : region.labelEn,
-                    warrior_count: byProvince[p]?.warrior_count ?? 0,
-                    prayers_90d: byProvince[p]?.prayers_90d ?? 0,
-                  }))
-              )
-              .sort((a, b) => b.warrior_count - a.warrior_count)
-              .map((row, i) => (
-                <div
-                  key={row.province}
-                  className="bg-white rounded-xl px-4 py-2.5 flex items-center gap-3"
-                >
-                  <span className="text-[var(--color-muted)] text-xs w-6 text-right flex-shrink-0 font-mono">
-                    {i + 1}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-[var(--color-ink)] text-sm font-medium">
-                      {row.province}
-                    </span>
-                    <span className="text-[var(--color-muted)] text-[10px] ml-1.5">
-                      {row.region}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0 text-xs">
-                    {row.prayers_90d > 0 && (
-                      <span className="text-[var(--color-terra)] font-semibold">
-                        {formatNum(row.prayers_90d)}
-                      </span>
-                    )}
-                    <span className="font-bold text-[var(--color-navy)] w-14 text-right">
-                      {formatNum(row.warrior_count)}
-                    </span>
-                  </div>
                 </div>
               ))}
         </div>
