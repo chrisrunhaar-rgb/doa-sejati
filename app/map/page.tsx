@@ -133,26 +133,38 @@ export default function MapPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-navy-deep)]">
-      {/* Header */}
-      <div className="px-5 pt-safe pt-4 pb-4 flex items-center justify-between">
-        <Link href="/today" className="text-white/60 hover:text-white/90 p-1">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </Link>
-        <div className="text-center">
-          <h1 className="font-display text-lg font-bold text-white">
-            {lang === "id" ? "Peta Pejuang Doa" : "Prayer Warriors"}
-          </h1>
-          <p className="text-white/40 text-[10px] uppercase tracking-wider">
-            {lang === "id" ? "Dari mana mereka berdoa" : "Where they pray from"}
-          </p>
+      {/* Header with photo background */}
+      <div
+        className="relative px-5 pt-safe pt-4 pb-6"
+        style={{
+          backgroundImage: "url('/header-prayer.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center top",
+        }}
+      >
+        {/* Dark overlay for text legibility */}
+        <div className="absolute inset-0 bg-[var(--color-navy-deep)]/70" />
+
+        <div className="relative flex items-center justify-between mb-4">
+          <Link href="/today" className="text-white/60 hover:text-white/90 p-1">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </Link>
+          <div className="text-center">
+            <h1 className="font-display text-lg font-bold text-white">
+              {lang === "id" ? "Peta Pejuang Doa" : "Prayer Warriors"}
+            </h1>
+            <p className="text-white/50 text-[10px] uppercase tracking-wider">
+              {lang === "id" ? "Dari mana mereka berdoa" : "Where they pray from"}
+            </p>
+          </div>
+          <LanguageToggle variant="white" />
         </div>
-        <LanguageToggle variant="white" />
       </div>
 
       {/* Top summary */}
-      <div className="px-5 pb-4 grid grid-cols-3 gap-3">
+      <div className="px-5 pb-4 pt-4 grid grid-cols-3 gap-3">
         {[
           { value: totalWarriors, labelId: "Pejuang Doa", labelEn: "Warriors" },
           { value: todayCount, labelId: "Berdoa Hari Ini", labelEn: "Today" },
