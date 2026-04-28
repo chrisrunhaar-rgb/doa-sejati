@@ -132,7 +132,7 @@ export async function recordPrayer(
 
   const { data: profile } = await supabase
     .from("ds_users")
-    .select("streak_count, streak_last_date")
+    .select("streak_count, streak_last_date, language, notification_time, timezone")
     .eq("id", userId)
     .single();
 
