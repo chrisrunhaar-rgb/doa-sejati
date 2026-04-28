@@ -8,7 +8,7 @@ import { useLang } from "@/components/LanguageContext";
 import { t, tr } from "@/lib/i18n";
 import type { Lang } from "@/lib/i18n";
 
-type Step = 1 | 2 | 3 | 4 | 5;
+type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
 interface FormData {
   language: Lang;
@@ -63,25 +63,23 @@ export default function SignupPage() {
   };
 
   const handleNameStep = () => {
-    if (!form.name.trim()) return; // name is required
+    if (!form.name.trim()) return;
     setStep(3);
   };
 
-  const handleTimeStep = () => setStep(4);
+  const handleTimeStep = () => setStep(5);
 
   const handleNotifRequest = async () => {
     if (!("Notification" in window)) {
-      setStep(5);
+      setStep(6);
       return;
     }
     const permission = await Notification.requestPermission();
     setNotifGranted(permission === "granted");
 
-    // Register push subscription if granted
     if (permission === "granted" && "serviceWorker" in navigator) {
       try {
         const reg = await navigator.serviceWorker.ready;
-        // Push subscription stored in Supabase in production
         await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
@@ -91,7 +89,7 @@ export default function SignupPage() {
       }
     }
 
-    setStep(5);
+    setStep(6);
   };
 
   const handleInstall = async () => {
@@ -108,7 +106,7 @@ export default function SignupPage() {
     router.push("/today");
   };
 
-  const totalSteps = 5;
+  const totalSteps = 6;
 
   return (
     <div className="min-h-screen bg-[var(--color-navy-deep)] flex flex-col">
@@ -168,6 +166,8 @@ export default function SignupPage() {
 
       {/* Step content */}
       <div className="flex-1 px-5 pb-8">
+
+        {/* Step 1 — Language */}
         {step === 1 && (
           <div className="animate-float-in text-center">
             <h2 className="font-display text-2xl font-bold text-white mb-2">
@@ -201,6 +201,7 @@ export default function SignupPage() {
           </div>
         )}
 
+        {/* Step 2 — Name + Email */}
         {step === 2 && (
           <div className="animate-float-in">
             <h2 className="font-display text-2xl font-bold text-white mb-2">
@@ -246,7 +247,116 @@ export default function SignupPage() {
           </div>
         )}
 
+        {/* Step 3 — Install app */}
         {step === 3 && (
+          <div className="animate-float-in">
+            {isStandalone || installed ? (
+              <>
+                <div className="p-5 rounded-2xl bg-[var(--color-prayed)]/20 border border-[var(--color-prayed)]/30 text-center mb-6">
+                  <div className="text-4xl mb-3">✅</div>
+                  <p className="text-white font-bold text-lg">
+                    {lang === "id" ? "Aplikasi sudah terpasang!" : "App already installed!"}
+                  </p>
+                  <p className="text-white/60 text-sm mt-1">
+                    {lang === "id" ? "Kamu sudah menggunakan Doa Sejati sebagai app." : "You are already using Doa Sejati as an app."}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setStep(4)}
+                  className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)]"
+                >
+                  {tr(t.signup.continueBtn, lang)}
+                </button>
+              </>
+            ) : isIOS ? (
+              <>
+                <h2 className="font-display text-2xl font-bold text-white mb-2">
+                  {lang === "id" ? "Pasang di iPhone kamu" : "Add to your iPhone"}
+                </h2>
+                <p className="text-white/60 text-sm mb-6">
+                  {lang === "id"
+                    ? "Buka Doa Sejati langsung dari layar utama — tanpa app store."
+                    : "Open Doa Sejati straight from your home screen — no app store needed."}
+                </p>
+                <div className="p-4 rounded-2xl bg-white/8 border border-white/10 mb-6">
+                  <ol className="flex flex-col gap-4">
+                    {(lang === "id"
+                      ? [
+                          { icon: "⬆️", text: "Tap ikon Bagikan (kotak dengan panah ke atas) di bagian bawah Safari" },
+                          { icon: "📋", text: "Scroll ke bawah dan pilih Tambahkan ke Layar Utama" },
+                          { icon: "✅", text: "Tap Tambahkan di pojok kanan atas" },
+                        ]
+                      : [
+                          { icon: "⬆️", text: "Tap the Share icon (box with arrow) at the bottom of Safari" },
+                          { icon: "📋", text: "Scroll down and tap Add to Home Screen" },
+                          { icon: "✅", text: "Tap Add in the top right corner" },
+                        ]
+                    ).map(({ icon, text }, i) => (
+                      <li key={i} className="flex gap-3 items-start">
+                        <span className="text-xl w-7 flex-shrink-0 text-center">{icon}</span>
+                        <span className="text-white/80 text-sm leading-snug pt-0.5">{text}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                <button
+                  onClick={() => setStep(4)}
+                  className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)] mb-3"
+                >
+                  {lang === "id" ? "Sudah ditambahkan →" : "Done, I added it →"}
+                </button>
+                <button
+                  onClick={() => setStep(4)}
+                  className="w-full py-3 text-white/40 text-sm"
+                >
+                  {tr(t.signup.laterBtn, lang)}
+                </button>
+              </>
+            ) : (
+              <>
+                <h2 className="font-display text-2xl font-bold text-white mb-2">
+                  {tr(t.signup.installApp, lang)}
+                </h2>
+                <p className="text-white/60 text-sm mb-6">
+                  {tr(t.signup.installHint, lang)}
+                </p>
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/8 border border-white/10 mb-6">
+                  <Image src="/icons/logo-ds.jpg" alt="" width={48} height={48} className="rounded-xl flex-shrink-0" />
+                  <div>
+                    <div className="font-bold text-white">Doa Sejati</div>
+                    <div className="text-white/50 text-sm">doasejati.net</div>
+                  </div>
+                </div>
+                {installPrompt ? (
+                  <>
+                    <button
+                      onClick={handleInstall}
+                      className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)] mb-3"
+                    >
+                      {tr(t.signup.installBtn, lang)}
+                    </button>
+                    <button
+                      onClick={() => setStep(4)}
+                      className="w-full py-3 text-white/40 text-sm"
+                    >
+                      {tr(t.signup.laterBtn, lang)}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setStep(4)}
+                    className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)]"
+                  >
+                    {tr(t.signup.continueBtn, lang)}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Step 4 — Notification time */}
+        {step === 4 && (
           <div className="animate-float-in">
             <h2 className="font-display text-2xl font-bold text-white mb-2">
               {tr(t.signup.reminderTime, lang)}
@@ -292,7 +402,8 @@ export default function SignupPage() {
           </div>
         )}
 
-        {step === 4 && (
+        {/* Step 5 — Notification permission */}
+        {step === 5 && (
           <div className="animate-float-in text-center">
             <div className="text-6xl mb-4">🔔</div>
             <h2 className="font-display text-2xl font-bold text-white mb-2">
@@ -309,7 +420,7 @@ export default function SignupPage() {
               {tr(t.signup.allowNotif, lang)}
             </button>
             <button
-              onClick={() => setStep(5)}
+              onClick={() => setStep(6)}
               className="w-full max-w-xs mx-auto py-3 text-white/50 text-sm block"
             >
               {tr(t.common.cancel, lang)}
@@ -317,108 +428,42 @@ export default function SignupPage() {
           </div>
         )}
 
-        {step === 5 && (
+        {/* Step 6 — Consent + Start */}
+        {step === 6 && (
           <div className="animate-float-in">
-            {/* Install section — platform-aware */}
-            {isStandalone || installed ? (
-              <div className="mb-6 p-4 rounded-2xl bg-[var(--color-prayed)]/20 border border-[var(--color-prayed)]/30 text-center">
-                <div className="text-3xl mb-2">✅</div>
-                <p className="text-white font-semibold">
-                  {lang === "id" ? "Aplikasi terpasang!" : "App installed!"}
-                </p>
-              </div>
-            ) : isIOS ? (
-              /* iOS: no beforeinstallprompt — show manual steps */
-              <div className="mb-6 p-4 rounded-2xl bg-white/8 border border-white/10">
-                <div className="flex items-center gap-3 mb-3">
-                  <Image src="/icons/logo-ds.jpg" alt="" width={40} height={40} className="rounded-xl" />
-                  <div>
-                    <div className="font-bold text-white text-sm">Doa Sejati</div>
-                    <div className="text-white/50 text-xs">doasejati.net</div>
-                  </div>
-                </div>
-                <h3 className="font-display text-xl font-bold text-white mb-1">
-                  {lang === "id" ? "Pasang di iPhone kamu" : "Add to your iPhone"}
-                </h3>
-                <ol className="flex flex-col gap-2 mt-3">
-                  {(lang === "id"
-                    ? ["Tap ikon Bagikan (kotak panah ke atas) di bawah Safari", "Scroll dan pilih Tambahkan ke Layar Utama", "Tap Tambahkan di pojok kanan atas"]
-                    : ["Tap the Share icon (box with arrow) at the bottom of Safari", "Scroll down and tap Add to Home Screen", "Tap Add in the top right corner"]
-                  ).map((step, i) => (
-                    <li key={i} className="flex gap-3 items-start">
-                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/15 text-white text-xs font-bold flex items-center justify-center">{i + 1}</span>
-                      <span className="text-white/70 text-sm leading-snug">{step}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ) : installPrompt ? (
-              /* Android Chrome: native install prompt */
-              <div className="mb-6 p-4 rounded-2xl bg-white/8 border border-white/10">
-                <div className="flex items-center gap-3 mb-3">
-                  <Image src="/icons/logo-ds.jpg" alt="" width={40} height={40} className="rounded-xl" />
-                  <div>
-                    <div className="font-bold text-white text-sm">Doa Sejati</div>
-                    <div className="text-white/50 text-xs">doasejati.net</div>
-                  </div>
-                </div>
-                <h3 className="font-display text-xl font-bold text-white mb-1">
-                  {tr(t.signup.installApp, lang)}
-                </h3>
-                <p className="text-white/60 text-sm mb-4">
-                  {tr(t.signup.installHint, lang)}
-                </p>
-                <button
-                  onClick={handleInstall}
-                  className="w-full py-3 rounded-xl font-bold text-white bg-[var(--color-terra)] mb-2"
-                >
-                  {tr(t.signup.installBtn, lang)}
-                </button>
-                <button
-                  onClick={() => setInstallPrompt(null)}
-                  className="w-full py-2 text-white/40 text-sm"
-                >
-                  {tr(t.signup.laterBtn, lang)}
-                </button>
-              </div>
-            ) : null}
+            <h2 className="font-display text-2xl font-bold text-white mb-4">
+              {lang === "id" ? "Hampir selesai!" : "Almost there!"}
+            </h2>
 
-            {/* Consent + start */}
-            <div className="mt-4">
-              <h2 className="font-display text-2xl font-bold text-white mb-4">
-                {lang === "id" ? "Hampir selesai!" : "Almost there!"}
-              </h2>
+            <label className="flex items-start gap-3 mb-6 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.consent}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, consent: e.target.checked }))
+                }
+                className="mt-1 w-5 h-5 rounded accent-[var(--color-terra)] flex-shrink-0"
+              />
+              <span className="text-white/70 text-sm leading-relaxed">
+                {tr(t.signup.consent, lang)}
+                <Link href="/privacy" className="text-[var(--color-terra)] font-semibold">
+                  {tr(t.signup.privacyLink, lang)}
+                </Link>
+                {tr(t.signup.andWord, lang)}
+                <Link href="/terms" className="text-[var(--color-terra)] font-semibold">
+                  {tr(t.signup.termsLink, lang)}
+                </Link>
+                .
+              </span>
+            </label>
 
-              <label className="flex items-start gap-3 mb-6 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.consent}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, consent: e.target.checked }))
-                  }
-                  className="mt-1 w-5 h-5 rounded accent-[var(--color-terra)] flex-shrink-0"
-                />
-                <span className="text-white/70 text-sm leading-relaxed">
-                  {tr(t.signup.consent, lang)}
-                  <Link href="/privacy" className="text-[var(--color-terra)] font-semibold">
-                    {tr(t.signup.privacyLink, lang)}
-                  </Link>
-                  {tr(t.signup.andWord, lang)}
-                  <Link href="/terms" className="text-[var(--color-terra)] font-semibold">
-                    {tr(t.signup.termsLink, lang)}
-                  </Link>
-                  .
-                </span>
-              </label>
-
-              <button
-                onClick={handleFinish}
-                disabled={!form.consent}
-                className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)] disabled:opacity-40 transition-opacity"
-              >
-                {tr(t.signup.startPraying, lang)}
-              </button>
-            </div>
+            <button
+              onClick={handleFinish}
+              disabled={!form.consent}
+              className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)] disabled:opacity-40 transition-opacity"
+            >
+              {tr(t.signup.startPraying, lang)}
+            </button>
           </div>
         )}
       </div>
