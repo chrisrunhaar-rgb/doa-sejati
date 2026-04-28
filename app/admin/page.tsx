@@ -196,17 +196,33 @@ function BarChart({ volume, loading }: { volume: VolumeEntry[]; loading: boolean
               return (
                 <div
                   key={entry.date}
-                  className="flex-1 rounded-t transition-all duration-200 cursor-default"
-                  style={{
-                    height: `${Math.max(heightPct, 2)}%`,
-                    background: isToday
-                      ? "var(--color-terra)"
-                      : "oklch(20% 0.09 258)",
-                    borderRadius: "2px 2px 0 0",
-                    opacity: entry.count === 0 ? 0.2 : 1,
-                  }}
+                  className="flex-1 flex flex-col items-center justify-end cursor-default"
+                  style={{ height: "100%" }}
                   title={`${fmtDate(entry.date)}: ${fmt(entry.count)} doa`}
-                />
+                >
+                  {entry.count > 0 && (
+                    <span
+                      className="font-bold"
+                      style={{
+                        fontSize: 10,
+                        color: isToday ? "var(--color-terra)" : "var(--color-navy)",
+                        marginBottom: 2,
+                        lineHeight: 1,
+                      }}
+                    >
+                      {fmt(entry.count)}
+                    </span>
+                  )}
+                  <div
+                    className="w-full rounded-t transition-all duration-200"
+                    style={{
+                      height: `${Math.max(heightPct, 2)}%`,
+                      background: isToday ? "var(--color-terra)" : "oklch(20% 0.09 258)",
+                      borderRadius: "2px 2px 0 0",
+                      opacity: entry.count === 0 ? 0.2 : 1,
+                    }}
+                  />
+                </div>
               );
             })}
           </div>
