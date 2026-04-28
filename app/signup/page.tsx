@@ -199,14 +199,14 @@ export default function SignupPage() {
                 onClick={() => handleLanguageChoice("id")}
                 className="flex items-center gap-4 p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 transition-colors"
               >
-                <span className="text-3xl">🇮🇩</span>
+                <span className="fi fi-id rounded" style={{ width: 36, height: 27, display: 'inline-block', backgroundSize: 'cover' }} />
                 <div className="font-bold text-white">Bahasa Indonesia</div>
               </button>
               <button
                 onClick={() => handleLanguageChoice("en")}
                 className="flex items-center gap-4 p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 transition-colors"
               >
-                <span className="text-3xl">🇬🇧</span>
+                <span className="fi fi-gb rounded" style={{ width: 36, height: 27, display: 'inline-block', backgroundSize: 'cover' }} />
                 <div className="font-bold text-white">English</div>
               </button>
             </div>
