@@ -39,7 +39,7 @@ export default function PrayedButton({
         key: Date.now(),
       });
       // Clean up after last ring finishes (1.2s + 360ms delay)
-      setTimeout(() => setRipple(null), 1700);
+      setTimeout(() => setRipple(null), 2800);
     }
 
     setLoading(true);
@@ -65,7 +65,7 @@ export default function PrayedButton({
           aria-hidden
           style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9999, overflow: "hidden" }}
         >
-          {[0, 170, 340].map((delay) => (
+          {[0, 240, 480].map((delay) => (
             <div
               key={delay}
               style={{
@@ -75,9 +75,9 @@ export default function PrayedButton({
                 width: ripple.size,
                 height: ripple.size,
                 borderRadius: "50%",
-                border: "1.5px solid rgba(255,255,255,0.45)",
+                border: "2.5px solid rgba(255,255,255,0.65)",
                 background: "transparent",
-                animation: `water-ring 1.2s cubic-bezier(0.2, 0.6, 0.4, 1) ${delay}ms forwards`,
+                animation: `water-ring 2s cubic-bezier(0.15, 0.5, 0.4, 1) ${delay}ms forwards`,
               }}
             />
           ))}
