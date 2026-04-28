@@ -236,6 +236,19 @@ export async function getUserTotalPrayed(userId: string): Promise<number> {
   return count ?? 0;
 }
 
+export interface DSIslandStat {
+  island: string;
+  upg_count: number;
+  total_prayers: number;
+  today_prayers: number;
+}
+
+// Helper: get prayer counts + UPG counts grouped by island (from ds_island_stats view)
+export async function getIslandStats(): Promise<DSIslandStat[]> {
+  const { data } = await supabase.from("ds_island_stats").select("*");
+  return (data as DSIslandStat[]) ?? [];
+}
+
 // Helper: update notification time, language, and/or name for a user
 export async function updateUserProfile(
   userId: string,
