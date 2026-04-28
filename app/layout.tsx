@@ -53,7 +53,7 @@ export default function RootLayout({
       className={`${vollkorn.variable} ${manrope.variable} h-full`}
     >
       <head>
-        <link rel="apple-touch-icon" href="/icons/logo-white.png" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body className="min-h-full bg-[var(--color-cream)] antialiased">
