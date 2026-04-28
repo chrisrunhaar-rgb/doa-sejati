@@ -151,7 +151,7 @@ export default function SignupPage() {
       {/* Logo */}
       <div className="flex justify-center py-6">
         <Image
-          src="/icons/logo-white.png"
+          src="/icons/logo-ds-white.png"
           alt="Doa Sejati"
           width={120}
           height={120}
