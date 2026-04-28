@@ -108,56 +108,17 @@ export async function getTodayPrayerCount(
   return data?.prayer_count ?? 0;
 }
 
-// Helper: record a prayer and update streak
+// Helper: record a prayer and update streak (server-side via API route — bypasses RLS)
 export async function recordPrayer(
   userId: string,
   contentId: string
 ): Promise<boolean> {
-  // Ensure user row exists before inserting prayer log (FK constraint)
-  await supabase.from("ds_users").upsert(
-    { id: userId, language: "id", notification_time: "07:00", timezone: "Asia/Jakarta" },
-    { onConflict: "id", ignoreDuplicates: true }
-  );
-
-  const { error } = await supabase.from("ds_prayer_logs").insert({
-    user_id: userId,
-    content_id: contentId,
-    prayed_at: new Date().toISOString(),
+  const res = await fetch("/api/prayer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, contentId }),
   });
-  if (error) return false;
-
-  // Update streak
-  const today = new Date().toISOString().split("T")[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-
-  const { data: profile } = await supabase
-    .from("ds_users")
-    .select("streak_count, streak_last_date, language, notification_time, timezone")
-    .eq("id", userId)
-    .single();
-
-  if (profile?.streak_last_date === today) return true; // already counted
-
-  const newStreak =
-    profile?.streak_last_date === yesterday
-      ? (profile.streak_count || 0) + 1
-      : 1;
-
-  // upsert so streak is written even if ds_users row is missing
-  await supabase.from("ds_users").upsert(
-    {
-      id: userId,
-      streak_count: newStreak,
-      streak_last_date: today,
-      last_prayed_at: new Date().toISOString(),
-      language: profile?.language ?? "id",
-      notification_time: profile?.notification_time ?? "07:00",
-      timezone: profile?.timezone ?? "Asia/Jakarta",
-    },
-    { onConflict: "id" }
-  );
-
-  return true;
+  return res.ok;
 }
 
 // Helper: check if user has already prayed today
@@ -233,22 +194,18 @@ export async function getTodayTotalCount(): Promise<number> {
 
 // Helper: get a user's profile from ds_users
 export async function getUserProfile(userId: string): Promise<DSUser | null> {
-  const { data, error } = await supabase
-    .from("ds_users")
-    .select("*")
-    .eq("id", userId)
-    .single();
-  if (error || !data) return null;
-  return data as DSUser;
+  const res = await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`);
+  if (!res.ok) return null;
+  const { profile } = await res.json();
+  return profile;
 }
 
 // Helper: get total prayers logged by a user
 export async function getUserTotalPrayed(userId: string): Promise<number> {
-  const { count } = await supabase
-    .from("ds_prayer_logs")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId);
-  return count ?? 0;
+  const res = await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`);
+  if (!res.ok) return 0;
+  const { totalPrayed } = await res.json();
+  return totalPrayed ?? 0;
 }
 
 export interface DSIslandStat {
@@ -266,8 +223,7 @@ export async function getIslandStats(): Promise<DSIslandStat[]> {
 
 // Helper: delete all user data and sign out
 export async function deleteAccount(userId: string): Promise<boolean> {
-  await supabase.from("ds_prayer_logs").delete().eq("user_id", userId);
-  await supabase.from("ds_users").delete().eq("id", userId);
+  await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`, { method: "DELETE" });
   await supabase.auth.signOut();
   localStorage.removeItem("ds_user_id");
   return true;
@@ -278,8 +234,10 @@ export async function updateUserProfile(
   userId: string,
   updates: { name?: string; notification_time?: string; language?: "id" | "en" }
 ): Promise<boolean> {
-  const { error } = await supabase
-    .from("ds_users")
-    .upsert({ id: userId, ...updates }, { onConflict: "id" });
-  return !error;
+  const res = await fetch("/api/profile", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, updates }),
+  });
+  return res.ok;
 }

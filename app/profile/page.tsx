@@ -7,8 +7,6 @@ import LanguageToggle from "@/components/LanguageToggle";
 import { t, tr } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import {
-  getUserProfile,
-  getUserTotalPrayed,
   updateUserProfile,
   deleteAccount,
   type DSUser,
@@ -29,16 +27,16 @@ export default function ProfilePage() {
     async function load() {
       const userId = localStorage.getItem("ds_user_id");
       if (!userId) { setLoading(false); return; }
-      const [profile, total] = await Promise.all([
-        getUserProfile(userId),
-        getUserTotalPrayed(userId),
-      ]);
-      if (profile) {
-        setUser(profile);
-        setEditName(profile.name || "");
-        setNotifTime(profile.notification_time || "07:00");
+      const res = await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`);
+      if (res.ok) {
+        const { profile, totalPrayed } = await res.json();
+        if (profile) {
+          setUser(profile);
+          setEditName(profile.name || "");
+          setNotifTime(profile.notification_time || "07:00");
+        }
+        setTotalPrayed(totalPrayed ?? 0);
       }
-      setTotalPrayed(total);
       setLoading(false);
     }
     load();
