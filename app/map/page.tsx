@@ -63,6 +63,12 @@ const REGIONS: { id: string; labelId: string; labelEn: string; provinces: string
       "Papua Pegunungan", "Papua Barat Daya",
     ],
   },
+  {
+    id: "internasional",
+    labelId: "Internasional",
+    labelEn: "International",
+    provinces: ["Luar Negeri"],
+  },
 ];
 
 // Aliases: some demo data uses short names
@@ -86,6 +92,7 @@ const REGION_COLORS = [
   "oklch(55% 0.13 38)",
   "oklch(40% 0.12 280)",
   "oklch(38% 0.10 150)",
+  "oklch(45% 0.08 300)",
 ];
 
 export default function MapPage() {

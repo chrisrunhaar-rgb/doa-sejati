@@ -42,6 +42,8 @@ export async function POST(req: Request) {
         }).then((r) => r.json());
         if (geo?.country_code === "ID" && geo?.region) {
           await supabase.from("ds_users").update({ province: geo.region }).eq("id", userId);
+        } else if (geo?.country_code && geo.country_code !== "ID") {
+          await supabase.from("ds_users").update({ province: "Luar Negeri" }).eq("id", userId);
         }
       } catch {
         // geolocation failed — continue without province
