@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Doa Sejati — Berdoa untuk Indonesia",
     description:
-      "Gerakan doa harian untuk 234 suku yang belum terjangkau di Indonesia.",
+      "Gerakan doa harian untuk suku terabaikan di Indonesia.",
     type: "website",
   },
 };
