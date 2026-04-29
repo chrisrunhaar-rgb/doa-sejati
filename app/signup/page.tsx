@@ -10,6 +10,15 @@ import { supabase, saveUserProfile } from "@/lib/supabase";
 import { useInstallPrompt } from "@/components/InstallPromptProvider";
 import type { Lang } from "@/lib/i18n";
 
+function vapidKeyToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const output = new Uint8Array(rawData.length) as Uint8Array<ArrayBuffer>;
+  for (let i = 0; i < rawData.length; i++) output[i] = rawData.charCodeAt(i);
+  return output;
+}
+
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
 
@@ -92,7 +101,7 @@ export default function SignupPage() {
         if (existing) await existing.unsubscribe();
         await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
+          applicationServerKey: vapidKeyToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ""),
         });
       } catch (err) {
         console.error("[DS] subscribe failed in signup:", err);
