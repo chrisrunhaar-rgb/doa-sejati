@@ -40,6 +40,7 @@ export default function SignupPage() {
     consent: false,
   });
   const [notifGranted, setNotifGranted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const { prompt: installPrompt } = useInstallPrompt();
   const [installed, setInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -121,6 +122,8 @@ export default function SignupPage() {
   };
 
   const handleFinish = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     try {
       // 1. Create anonymous Supabase session
       const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
@@ -508,10 +511,10 @@ export default function SignupPage() {
 
             <button
               onClick={handleFinish}
-              disabled={!form.consent}
+              disabled={!form.consent || submitting}
               className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)] disabled:opacity-40 transition-opacity"
             >
-              {tr(t.signup.startPraying, lang)}
+              {submitting ? (lang === "id" ? "Memproses..." : "Processing...") : tr(t.signup.startPraying, lang)}
             </button>
           </div>
         )}
