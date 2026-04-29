@@ -12,6 +12,13 @@ import type { Lang } from "@/lib/i18n";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+}
+
 interface FormData {
   language: Lang;
   name: string;
@@ -86,12 +93,13 @@ export default function SignupPage() {
           new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sw-timeout")), 5000)),
         ]);
         const reg = await swReady;
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
         await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
+          applicationServerKey: urlBase64ToUint8Array(vapidKey),
         });
-      } catch {
-        // SW not ready or subscribe failed — continue gracefully
+      } catch (err) {
+        console.error("[DS] subscribe failed in signup:", err);
       }
     }
 

@@ -12,6 +12,13 @@ import {
   type DSUser,
 } from "@/lib/supabase";
 
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+}
+
 export default function ProfilePage() {
   const { lang } = useLang();
   const router = useRouter();
@@ -86,17 +93,18 @@ export default function ProfilePage() {
         new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sw-timeout")), 8000)),
       ]);
       const reg = await swReady;
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
       const userId = localStorage.getItem("ds_user_id");
       if (userId) {
         await updateUserProfile(userId, { push_token: sub.toJSON() as object });
       }
       setPushStatus("granted");
-    } catch {
-      // subscribe failed — but permission was granted, so show idle (allow retry)
+    } catch (err) {
+      console.error("[DS] subscribe failed in profile:", err);
       setPushStatus("idle");
     }
   };
