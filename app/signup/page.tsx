@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/components/LanguageContext";
 import { t, tr } from "@/lib/i18n";
-import { supabase, saveUserProfile } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { useInstallPrompt } from "@/components/InstallPromptProvider";
 import type { Lang } from "@/lib/i18n";
 
@@ -151,26 +151,24 @@ export default function SignupPage() {
         }
       }
 
-      // 4. Save profile to ds_users
-      await saveUserProfile(userId, {
-        name: form.name,
-        language: form.language,
-        notification_time: form.notifTime,
-        timezone,
-        push_token: pushToken,
-        user_token: userToken,
+      // 4. Save profile + detect province server-side (awaited — province needs server geo headers)
+      await fetch("/api/create-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          name: form.name,
+          language: form.language,
+          notification_time: form.notifTime,
+          timezone,
+          push_token: pushToken,
+          user_token: userToken,
+        }),
       });
 
       // 5. Persist userId and token for session
       localStorage.setItem("ds_user_id", userId);
       localStorage.setItem("ds_user_token", userToken);
-
-      // 6. Set province from IP (fire-and-forget)
-      fetch("/api/set-province", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      }).catch(() => {});
     } catch {
       // Auth or save failed — still proceed to app (offline-tolerant)
     }
