@@ -135,6 +135,13 @@ export default function SignupPage() {
       // 5. Persist userId and token for session
       localStorage.setItem("ds_user_id", userId);
       localStorage.setItem("ds_user_token", userToken);
+
+      // 6. Set province from IP (fire-and-forget)
+      fetch("/api/set-province", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      }).catch(() => {});
     } catch {
       // Auth or save failed — still proceed to app (offline-tolerant)
     }

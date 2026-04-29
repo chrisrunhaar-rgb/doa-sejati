@@ -80,11 +80,11 @@ function fmtDateTime(iso: string): string {
 }
 
 function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const days = Math.floor(diff / 86400000);
-  if (days === 0) return "hari ini";
-  if (days === 1) return "kemarin";
-  return `${days}h lalu`;
+  const wib = (ms: number) => new Date(ms + 7 * 3600000).toISOString().split("T")[0];
+  const todayWib = wib(Date.now());
+  const thenWib  = wib(new Date(iso).getTime());
+  if (thenWib === todayWib) return "hari ini";
+  return new Date(thenWib).toLocaleDateString("id-ID", { day: "numeric", month: "short" });
 }
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
@@ -155,7 +155,7 @@ function StatCard({
 // ─── Bar Chart ───────────────────────────────────────────────────────────────
 
 function BarChart({ volume, loading }: { volume: VolumeEntry[]; loading: boolean }) {
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = new Date(Date.now() + 7 * 3600000).toISOString().split("T")[0];
   const max = volume.length > 0 ? Math.max(...volume.map((v) => v.count), 1) : 1;
 
   return (
@@ -618,7 +618,7 @@ function ContentCalendar({
   loading: boolean;
   onPreview: (item: UpcomingContent) => void;
 }) {
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = new Date(Date.now() + 7 * 3600000).toISOString().split("T")[0];
 
   return (
     <div
@@ -1012,7 +1012,10 @@ export default function AdminPage() {
               Doa Sejati
             </h1>
             <p className="text-xs" style={{ color: "oklch(60% 0.06 258)" }}>
-              Admin Dashboard · JATI
+              Admin Dashboard · JATI ·{" "}
+              {new Date(Date.now() + 7 * 3600000).toLocaleDateString("id-ID", {
+                day: "numeric", month: "long", year: "numeric",
+              })}
             </p>
           </div>
         </div>

@@ -131,7 +131,7 @@ export default function TodayPage() {
               {tr(t.prayer.todayPrayer, lang)}
             </div>
             <div className="text-[11px] text-white/70 font-medium mt-0.5">
-              {new Date().toLocaleDateString(lang === "id" ? "id-ID" : "en-GB", {
+              {new Date(Date.now() + 7 * 3600000).toLocaleDateString(lang === "id" ? "id-ID" : "en-GB", {
                 weekday: "long",
                 day: "numeric",
                 month: "long",

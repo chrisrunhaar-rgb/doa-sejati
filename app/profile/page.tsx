@@ -22,6 +22,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [pushStatus, setPushStatus] = useState<"idle" | "requesting" | "granted" | "denied">("idle");
 
   useEffect(() => {
     async function load() {
@@ -50,6 +51,27 @@ export default function ProfilePage() {
         { month: "long", year: "numeric" }
       )
     : "";
+
+  const handleEnablePush = async () => {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
+    setPushStatus("requesting");
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") { setPushStatus("denied"); return; }
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
+      });
+      const userId = localStorage.getItem("ds_user_id");
+      if (userId) {
+        await updateUserProfile(userId, { push_token: sub.toJSON() as object });
+      }
+      setPushStatus("granted");
+    } catch {
+      setPushStatus("denied");
+    }
+  };
 
   const handleSave = async () => {
     const userId = localStorage.getItem("ds_user_id");
@@ -154,6 +176,30 @@ export default function ProfilePage() {
               onChange={(e) => setNotifTime(e.target.value)}
               className="w-full bg-[var(--color-surface)] rounded-xl px-3 py-2.5 text-[var(--color-ink)] font-semibold focus:outline-none [color-scheme:light]"
             />
+          </div>
+
+          <div className="border-t border-[var(--color-border)] mx-4" />
+
+          {/* Push notifications */}
+          <div className="px-4 py-4">
+            <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider block mb-2">
+              {lang === "id" ? "Notifikasi Push" : "Push Notifications"}
+            </label>
+            <button
+              onClick={handleEnablePush}
+              disabled={pushStatus === "requesting" || pushStatus === "granted"}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all
+                bg-[var(--color-navy)]/8 text-[var(--color-navy)]
+                disabled:opacity-50"
+            >
+              {pushStatus === "granted"
+                ? (lang === "id" ? "✓ Notifikasi aktif" : "✓ Notifications enabled")
+                : pushStatus === "denied"
+                ? (lang === "id" ? "Izin ditolak — ubah di pengaturan browser" : "Permission denied — change in browser settings")
+                : pushStatus === "requesting"
+                ? "..."
+                : (lang === "id" ? "Aktifkan notifikasi harian" : "Enable daily notifications")}
+            </button>
           </div>
 
           <div className="border-t border-[var(--color-border)] mx-4" />

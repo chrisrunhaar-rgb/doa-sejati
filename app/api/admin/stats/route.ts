@@ -9,17 +9,25 @@ export async function GET(req: Request) {
 
   const supabase = createServiceClient();
 
+  // WIB = UTC+7 — all day-boundary calculations use WIB midnight as a UTC timestamp
+  const wibDay = (offsetMs = 0) =>
+    new Date(Date.now() + 7 * 3600000 - offsetMs).toISOString().split("T")[0];
+  const todayWib = wibDay();
+  // WIB midnight as a UTC ISO string (e.g. "2026-04-28T17:00:00.000Z" for WIB Apr 29)
+  const todayWibStartUTC = new Date(todayWib + "T00:00:00+07:00").toISOString();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+
   const [
     totalUsersRes, todayNewUsersRes, pushTokenRes,
     totalPrayersRes, todayPrayersRes, thirtyDayPrayersRes,
     avgStreakRes, streak7Res, streak30Res, pushOpensRes,
   ] = await Promise.all([
     supabase.from("ds_users").select("*", { count: "exact", head: true }),
-    supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("created_at", new Date().toISOString().split("T")[0]),
+    supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("created_at", todayWibStartUTC),
     supabase.from("ds_users").select("*", { count: "exact", head: true }).not("push_token", "is", null),
     supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }),
-    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).gte("prayed_at", new Date().toISOString().split("T")[0]),
-    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).gte("prayed_at", new Date(Date.now() - 30 * 86400000).toISOString()),
+    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).gte("prayed_at", todayWibStartUTC),
+    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).gte("prayed_at", thirtyDaysAgo),
     supabase.from("ds_users").select("streak_count").gt("streak_count", 0),
     supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("streak_count", 7),
     supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("streak_count", 30),

@@ -63,9 +63,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: logError.message }, { status: 500 });
   }
 
-  // Update streak
-  const today = new Date().toISOString().split("T")[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+  // Update streak — use WIB (UTC+7) so Indonesian users' day boundaries are respected
+  const wib = (ms: number) => new Date(ms + 7 * 3600000);
+  const today     = wib(Date.now()).toISOString().split("T")[0];
+  const yesterday = wib(Date.now() - 86400000).toISOString().split("T")[0];
 
   const { data: profile } = await supabase
     .from("ds_users")
@@ -74,7 +75,7 @@ export async function POST(req: Request) {
     .single();
 
   if (profile?.streak_last_date === today) {
-    return NextResponse.json({ ok: true, alreadyCounted: true });
+    return NextResponse.json({ ok: true, alreadyCounted: true, streak: profile.streak_count });
   }
 
   const newStreak =

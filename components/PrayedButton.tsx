@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useLang } from "./LanguageContext";
 import { t, tr } from "@/lib/i18n";
 
@@ -9,44 +9,100 @@ interface PrayedButtonProps {
   initialPrayed?: boolean;
 }
 
-interface RippleOrigin {
-  x: number;
-  y: number;
-  size: number;
-  key: number;
-}
+const RING_DURATION = 2200; // ms per ring — slower = more natural
+const RING_STAGGER  = 300;  // ms between rings
+const RING_COUNT    = 4;
 
 export default function PrayedButton({
   onPrayed,
   initialPrayed = false,
 }: PrayedButtonProps) {
   const { lang } = useLang();
-  const [prayed, setPrayed] = useState(initialPrayed);
+  const [prayed, setPrayed]   = useState(initialPrayed);
   const [loading, setLoading] = useState(false);
-  const [ripple, setRipple] = useState<RippleOrigin | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animRef   = useRef<number | null>(null);
+  const rippleRef = useRef<{ x: number; y: number; maxR: number; t0: number } | null>(null);
+
+  const startRipple = useCallback((originX: number, originY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    canvas.width  = W;
+    canvas.height = H;
+
+    const maxR = Math.sqrt(
+      Math.pow(Math.max(originX, W - originX), 2) +
+      Math.pow(Math.max(originY, H - originY), 2)
+    ) + 40;
+
+    rippleRef.current = { x: originX, y: originY, maxR, t0: performance.now() };
+    if (animRef.current) cancelAnimationFrame(animRef.current);
+
+    const ctx = canvas.getContext("2d")!;
+
+    function frame(now: number) {
+      if (!rippleRef.current) return;
+      const { x, y, maxR, t0 } = rippleRef.current;
+      const elapsed = now - t0;
+
+      ctx.clearRect(0, 0, W, H);
+
+      let alive = false;
+      for (let i = 0; i < RING_COUNT; i++) {
+        const re = elapsed - i * RING_STAGGER;
+        if (re < 0) { alive = true; continue; }
+        const t = re / RING_DURATION;
+        if (t >= 1) continue;
+        alive = true;
+
+        const r = maxR * t;
+
+        // Soft outer glow
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(180,220,255,${((1 - t) * 0.18).toFixed(3)})`;
+        ctx.lineWidth   = 28 * (1 - t * 0.6);
+        ctx.stroke();
+
+        // Bright thin edge
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,255,255,${(Math.pow(1 - t, 1.2) * 0.55).toFixed(3)})`;
+        ctx.lineWidth   = 2.5 * (1 - t * 0.5);
+        ctx.stroke();
+      }
+
+      if (alive) {
+        animRef.current = requestAnimationFrame(frame);
+      } else {
+        ctx.clearRect(0, 0, W, H);
+        rippleRef.current = null;
+        animRef.current   = null;
+      }
+    }
+
+    animRef.current = requestAnimationFrame(frame);
+  }, []);
 
   const handlePray = async () => {
     if (prayed || loading) return;
-
-    // Capture button center for ripple origin
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setRipple({
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2,
-        size: Math.max(rect.width, 60),
-        key: Date.now(),
-      });
-      // Clean up after last ring finishes (1.2s + 360ms delay)
-      setTimeout(() => setRipple(null), 2800);
+      startRipple(rect.left + rect.width / 2, rect.top + rect.height / 2);
     }
-
     setLoading(true);
     await onPrayed();
     setPrayed(true);
     setLoading(false);
   };
+
+  useEffect(() => {
+    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+  }, []);
 
   if (prayed) {
     return (
@@ -58,32 +114,11 @@ export default function PrayedButton({
 
   return (
     <>
-      {/* Water rings — fixed, renders over entire screen */}
-      {ripple && (
-        <div
-          key={ripple.key}
-          aria-hidden
-          style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9999, overflow: "hidden" }}
-        >
-          {[0, 240, 480].map((delay) => (
-            <div
-              key={delay}
-              style={{
-                position: "absolute",
-                left: ripple.x - ripple.size / 2,
-                top: ripple.y - ripple.size / 2,
-                width: ripple.size,
-                height: ripple.size,
-                borderRadius: "50%",
-                border: "2.5px solid rgba(255,255,255,0.65)",
-                background: "transparent",
-                animation: `water-ring 2s cubic-bezier(0.15, 0.5, 0.4, 1) ${delay}ms forwards`,
-              }}
-            />
-          ))}
-        </div>
-      )}
-
+      <canvas
+        ref={canvasRef}
+        aria-hidden
+        style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9999 }}
+      />
       <button
         ref={buttonRef}
         onClick={handlePray}

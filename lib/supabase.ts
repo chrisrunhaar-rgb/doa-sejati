@@ -99,7 +99,7 @@ export async function getTodayPrayerContent(): Promise<DSPrayerContent | null> {
 export async function getTodayPrayerCount(
   peopleGroupId: string
 ): Promise<number> {
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date(Date.now() + 7 * 3600000).toISOString().split("T")[0];
   const { data } = await supabase
     .from("ds_upg_daily_counts")
     .select("prayer_count")
@@ -146,7 +146,7 @@ export async function hasPrayedToday(
 export async function getProvinceCounts(): Promise<
   Record<string, number>
 > {
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date(Date.now() + 7 * 3600000).toISOString().split("T")[0];
   const { data } = await supabase
     .from("ds_province_daily_counts")
     .select("province_name, prayer_count")
@@ -188,15 +188,14 @@ export async function getThirtyDayCount(): Promise<number> {
 
 // Helper: get today's total prayer count (reads directly from logs)
 export async function getTodayTotalCount(): Promise<number> {
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  const wibDate = new Date(Date.now() + 7 * 3600000).toISOString().split("T")[0];
+  const start = new Date(wibDate + "T00:00:00+07:00").toISOString();
+  const end   = new Date(wibDate + "T24:00:00+07:00").toISOString();
   const { count } = await supabase
     .from("ds_prayer_logs")
     .select("id", { count: "exact", head: true })
-    .gte("prayed_at", today.toISOString())
-    .lt("prayed_at", tomorrow.toISOString());
+    .gte("prayed_at", start)
+    .lt("prayed_at", end);
   return count ?? 0;
 }
 
@@ -245,7 +244,7 @@ export async function deleteAccount(userId: string): Promise<boolean> {
 // Helper: update notification time, language, and/or name for a user
 export async function updateUserProfile(
   userId: string,
-  updates: { name?: string; notification_time?: string; language?: "id" | "en" }
+  updates: { name?: string; notification_time?: string; language?: "id" | "en"; push_token?: object }
 ): Promise<boolean> {
   const userToken = typeof window !== "undefined" ? localStorage.getItem("ds_user_token") : null;
   const res = await fetch("/api/profile", {

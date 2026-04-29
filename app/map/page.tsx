@@ -159,7 +159,15 @@ export default function MapPage() {
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </Link>
-          <LanguageToggle variant="white" />
+          <div className="flex items-center gap-2">
+            <LanguageToggle variant="white" />
+            <Link href="/profile" className="text-white/60 hover:text-white/90 transition-colors p-1" aria-label="Profil">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+            </Link>
+          </div>
         </div>
 
         <div className="relative text-center pb-2">
@@ -167,7 +175,7 @@ export default function MapPage() {
             {lang === "id" ? "Peta Pejuang Doa" : "Prayer Warriors"}
           </h1>
           <p className="text-white/70 text-[11px] uppercase tracking-widest mt-1 drop-shadow">
-            {lang === "id" ? "Dari mana mereka berdoa" : "Where they pray from"}
+            {lang === "id" ? "Dari mana kita berdoa" : "Where we pray from"}
           </p>
         </div>
       </div>

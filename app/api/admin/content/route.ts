@@ -41,7 +41,7 @@ export async function GET(req: Request) {
 
   const supabase = createServiceClient();
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date(Date.now() + 7 * 3600000).toISOString().split("T")[0];
 
   const { data, error } = await supabase
     .from("ds_prayer_content")
