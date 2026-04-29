@@ -71,6 +71,11 @@ export default function SignupPage() {
       setStep(6);
       return;
     }
+    if (Notification.permission === "denied") {
+      setNotifGranted(false);
+      setStep(6);
+      return;
+    }
     const permission = await Notification.requestPermission();
     setNotifGranted(permission === "granted");
 
@@ -118,7 +123,11 @@ export default function SignupPage() {
       let pushToken: object | null = null;
       if ("serviceWorker" in navigator) {
         try {
-          const reg = await navigator.serviceWorker.ready;
+          const swReady = Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sw-timeout")), 5000)),
+          ]);
+          const reg = await swReady;
           const sub = await reg.pushManager.getSubscription();
           if (sub) pushToken = sub.toJSON();
         } catch {
