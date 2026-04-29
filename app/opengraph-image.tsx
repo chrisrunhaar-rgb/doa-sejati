@@ -25,21 +25,46 @@ export default async function Image() {
           fontFamily: "serif",
         }}
       >
+        {/* Subtle glow behind logo */}
+        <div
+          style={{
+            position: "absolute",
+            top: 80,
+            left: 300,
+            width: 600,
+            height: 360,
+            background: "radial-gradient(ellipse at center, rgba(100,160,255,0.15) 0%, transparent 70%)",
+            display: "flex",
+          }}
+        />
+
         {/* Logo */}
         <img
           src={logoSrc}
-          width={320}
-          height={120}
-          style={{ objectFit: "contain", marginBottom: 32 }}
+          width={340}
+          height={128}
+          style={{ objectFit: "contain", marginBottom: 36 }}
+        />
+
+        {/* Accent divider */}
+        <div
+          style={{
+            width: 60,
+            height: 3,
+            background: "rgba(255,255,255,0.5)",
+            marginBottom: 28,
+            display: "flex",
+          }}
         />
 
         {/* Tagline */}
         <div
           style={{
-            fontSize: 32,
-            color: "rgba(255,255,255,0.65)",
-            letterSpacing: "0.08em",
+            fontSize: 34,
+            color: "rgba(255,255,255,0.95)",
+            letterSpacing: "0.1em",
             textTransform: "uppercase",
+            fontWeight: "bold",
           }}
         >
           Berdoa untuk Indonesia
@@ -49,8 +74,10 @@ export default async function Image() {
         <div
           style={{
             fontSize: 22,
-            color: "rgba(255,255,255,0.35)",
-            marginTop: 16,
+            color: "rgba(255,255,255,0.65)",
+            marginTop: 18,
+            maxWidth: 700,
+            textAlign: "center",
           }}
         >
           Gerakan doa harian untuk suku-suku yang belum terjangkau
@@ -62,8 +89,8 @@ export default async function Image() {
             position: "absolute",
             bottom: 36,
             fontSize: 18,
-            color: "rgba(255,255,255,0.25)",
-            letterSpacing: "0.05em",
+            color: "rgba(255,255,255,0.45)",
+            letterSpacing: "0.06em",
           }}
         >
           doa-sejati.vercel.app
