@@ -936,11 +936,12 @@ export default function AdminPage() {
     []
   );
 
-  // Load data once authed
+  // Load data once authed + auto-refresh every 60s
   useEffect(() => {
-    if (authed && adminPass) {
-      fetchAll(adminPass);
-    }
+    if (!authed || !adminPass) return;
+    fetchAll(adminPass);
+    const interval = setInterval(() => fetchAll(adminPass), 60_000);
+    return () => clearInterval(interval);
   }, [authed, adminPass, fetchAll]);
 
   function handleLogin(pass: string) {
@@ -1023,6 +1024,9 @@ export default function AdminPage() {
               {new Date(Date.now() + 7 * 3600000).toLocaleDateString("id-ID", {
                 day: "numeric", month: "long", year: "numeric",
               })}
+              {lastUpdated && (
+                <span> · Diperbarui {lastUpdated.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+              )}
             </p>
           </div>
         </div>
