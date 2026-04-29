@@ -936,12 +936,11 @@ export default function AdminPage() {
     []
   );
 
-  // Load data once authed + auto-refresh every 60s
+  // Load data once authed
   useEffect(() => {
-    if (!authed || !adminPass) return;
-    fetchAll(adminPass);
-    const interval = setInterval(() => fetchAll(adminPass), 60_000);
-    return () => clearInterval(interval);
+    if (authed && adminPass) {
+      fetchAll(adminPass);
+    }
   }, [authed, adminPass, fetchAll]);
 
   function handleLogin(pass: string) {
