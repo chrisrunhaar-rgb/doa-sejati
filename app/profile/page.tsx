@@ -41,7 +41,11 @@ export default function ProfilePage() {
         // Check browser-side push subscription state
         if ("serviceWorker" in navigator && "PushManager" in window) {
           try {
-            const reg = await navigator.serviceWorker.ready;
+            const swReady = Promise.race([
+              navigator.serviceWorker.ready,
+              new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sw-timeout")), 5000)),
+            ]);
+            const reg = await swReady;
             const sub = await reg.pushManager.getSubscription();
             if (sub) {
               setPushStatus("granted");
@@ -77,7 +81,11 @@ export default function ProfilePage() {
     const permission = await Notification.requestPermission();
     if (permission !== "granted") { setPushStatus("denied"); return; }
     try {
-      const reg = await navigator.serviceWorker.ready;
+      const swReady = Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sw-timeout")), 8000)),
+      ]);
+      const reg = await swReady;
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
@@ -88,7 +96,8 @@ export default function ProfilePage() {
       }
       setPushStatus("granted");
     } catch {
-      setPushStatus("denied");
+      // subscribe failed — but permission was granted, so show idle (allow retry)
+      setPushStatus("idle");
     }
   };
 
