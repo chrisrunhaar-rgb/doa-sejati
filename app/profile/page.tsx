@@ -37,6 +37,25 @@ export default function ProfilePage() {
           setNotifTime(profile.notification_time || "07:00");
         }
         setTotalPrayed(totalPrayed ?? 0);
+
+        // Check browser-side push subscription state
+        if ("serviceWorker" in navigator && "PushManager" in window) {
+          try {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) {
+              setPushStatus("granted");
+              // Silently fix missing token in DB (e.g. signed up when VAPID was broken)
+              if (!profile?.push_token && userId) {
+                await updateUserProfile(userId, { push_token: sub.toJSON() as object });
+              }
+            } else if (Notification.permission === "denied") {
+              setPushStatus("denied");
+            }
+          } catch {
+            // push API unavailable — leave as idle
+          }
+        }
       }
       setLoading(false);
     }
