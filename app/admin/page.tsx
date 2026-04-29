@@ -403,7 +403,7 @@ function RecentSignupsTable({
                   borderBottom: "2px solid var(--color-border)",
                 }}
               >
-                {["Nama", "Provinsi", "Bahasa", "Streak", "Bergabung"].map(
+                {["#", "Nama", "Provinsi", "Bahasa", "Streak", "Bergabung"].map(
                   (h) => (
                     <th
                       key={h}
@@ -425,6 +425,12 @@ function RecentSignupsTable({
                     borderColor: "var(--color-border)",
                   }}
                 >
+                  <td
+                    className="py-2 pr-3 font-mono"
+                    style={{ color: "var(--color-muted)", fontSize: 10, whiteSpace: "nowrap" }}
+                  >
+                    {user.user_number ?? "—"}
+                  </td>
                   <td
                     className="py-2 pr-3 font-medium truncate max-w-[120px]"
                     style={{ color: "var(--color-ink)" }}

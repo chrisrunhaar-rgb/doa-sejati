@@ -9,6 +9,7 @@ export interface AdminUser {
   streak_count: number | null;
   created_at: string;
   last_prayed_at: string | null;
+  user_number: number | null;
 }
 
 export interface ProvinceEntry {
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
   const [recentRes, provinceRes] = await Promise.all([
     supabase
       .from("ds_users")
-      .select("id, name, language, province, streak_count, created_at, last_prayed_at")
+      .select("id, name, language, province, streak_count, created_at, last_prayed_at, user_number")
       .order("created_at", { ascending: false })
       .limit(50),
     supabase

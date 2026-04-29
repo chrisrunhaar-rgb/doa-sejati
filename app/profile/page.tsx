@@ -108,6 +108,11 @@ export default function ProfilePage() {
               <div className="text-white text-xl font-bold font-display">
                 {userName || (lang === "id" ? "Pejuang Doa" : "Prayer Warrior")}
               </div>
+              {user?.user_number && (
+                <div className="text-white/50 text-xs font-mono mt-0.5">
+                  #{user.user_number.toLocaleString()}
+                </div>
+              )}
               {memberSince && (
                 <div className="text-white/40 text-xs mt-0.5">
                   {lang === "id" ? `Bergabung ${memberSince}` : `Joined ${memberSince}`}

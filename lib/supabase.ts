@@ -23,6 +23,7 @@ export interface DSUser {
   last_prayed_at: string | null;
   streak_count: number;
   streak_last_date: string | null;
+  user_number: number | null;
 }
 
 export interface DSPeopleGroup {
