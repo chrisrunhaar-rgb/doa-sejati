@@ -76,13 +76,17 @@ export default function SignupPage() {
 
     if (permission === "granted" && "serviceWorker" in navigator) {
       try {
-        const reg = await navigator.serviceWorker.ready;
+        const swReady = Promise.race([
+          navigator.serviceWorker.ready,
+          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sw-timeout")), 5000)),
+        ]);
+        const reg = await swReady;
         await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
         });
       } catch {
-        // VAPID key not configured yet — continue gracefully
+        // SW not ready or subscribe failed — continue gracefully
       }
     }
 
