@@ -23,6 +23,7 @@ export default function ProfilePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saved, setSaved] = useState(false);
   const [pushStatus, setPushStatus] = useState<"idle" | "requesting" | "granted" | "denied">("idle");
+  const [pushError, setPushError] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -100,7 +101,9 @@ export default function ProfilePage() {
       }
       setPushStatus("granted");
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error("[DS] subscribe failed in profile:", err);
+      setPushError(msg);
       setPushStatus("idle");
     }
   };
@@ -237,6 +240,9 @@ export default function ProfilePage() {
                 ? "..."
                 : (lang === "id" ? "Aktifkan notifikasi harian" : "Enable daily notifications")}
             </button>
+            {pushError && (
+              <p className="text-red-500 text-xs mt-1 break-all">{pushError}</p>
+            )}
           </div>
 
           <div className="border-t border-[var(--color-border)] mx-4" />
