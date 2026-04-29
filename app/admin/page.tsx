@@ -30,6 +30,7 @@ interface AdminUser {
   streak_count: number | null;
   created_at: string;
   last_prayed_at: string | null;
+  user_number: number | null;
 }
 
 interface ProvinceEntry {
