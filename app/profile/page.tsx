@@ -12,15 +12,6 @@ import {
   type DSUser,
 } from "@/lib/supabase";
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const rawData = window.atob(base64);
-  const output = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; i++) output[i] = rawData.charCodeAt(i);
-  return output;
-}
-
 export default function ProfilePage() {
   const { lang } = useLang();
   const router = useRouter();
@@ -95,10 +86,13 @@ export default function ProfilePage() {
         new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sw-timeout")), 8000)),
       ]);
       const reg = await swReady;
+      // Clear any stale subscription before subscribing fresh
+      const existing = await reg.pushManager.getSubscription();
+      if (existing) await existing.unsubscribe();
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey),
+        applicationServerKey: vapidKey,
       });
       const userId = localStorage.getItem("ds_user_id");
       if (userId) {

@@ -12,14 +12,6 @@ import type { Lang } from "@/lib/i18n";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const rawData = window.atob(base64);
-  const output = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; i++) output[i] = rawData.charCodeAt(i);
-  return output;
-}
 
 interface FormData {
   language: Lang;
@@ -95,10 +87,12 @@ export default function SignupPage() {
           new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sw-timeout")), 5000)),
         ]);
         const reg = await swReady;
-        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
+        // Clear any stale subscription before subscribing fresh
+        const existing = await reg.pushManager.getSubscription();
+        if (existing) await existing.unsubscribe();
         await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidKey),
+          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
         });
       } catch (err) {
         console.error("[DS] subscribe failed in signup:", err);
