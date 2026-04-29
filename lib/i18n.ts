@@ -59,7 +59,7 @@ export const t = {
     prayingToday: { id: "orang berdoa hari ini", en: "people praying today" },
     joinCounter: { id: "Bergabung dengan", en: "Join" },
     streakDays: { id: "hari berturut-turut", en: "days in a row" },
-    streakLabel: { id: "Kamu sudah berdoa", en: "You have prayed" },
+    streakLabel: { id: "Anda sudah berdoa", en: "You have prayed" },
     share: { id: "Bagikan", en: "Share" },
     give: { id: "Ingin berbuat lebih? Dukung pelayanan di antara suku ini.", en: "Want to go further? Support ministry among this people." },
     learnMore: { id: "Pelajari lebih lanjut di Joshua Project →", en: "Learn more at Joshua Project →" },

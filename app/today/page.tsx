@@ -245,26 +245,8 @@ export default function TodayPage() {
           )}
         </div>
 
-        {/* Joshua Project attribution — required by their terms of use */}
-        <p className="text-[10px] text-[var(--color-muted)] text-center mb-1">
-          {lang === "id" ? "Data suku dari" : "People group data from"}{" "}
-          <a
-            href="https://www.joshuaproject.net"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline"
-          >
-            Joshua Project
-          </a>
-        </p>
-        <p className="text-[10px] text-[var(--color-muted)] text-center mb-4">
-          {lang === "id"
-            ? "Doa Sejati · Sebuah proyek dari JATI — Yayasan Jala Transformasi Indonesia"
-            : "Doa Sejati · A project of JATI — Yayasan Jala Transformasi Indonesia"}
-        </p>
-
         {/* Action row */}
-        <div className="flex gap-3 mb-8">
+        <div className="flex gap-3 mb-4">
           <button
             onClick={() => setShowShare(true)}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-[var(--color-border)] text-[var(--color-ink)] font-semibold text-sm active:bg-[var(--color-surface)] transition-colors"
@@ -291,6 +273,24 @@ export default function TodayPage() {
             {lang === "id" ? "Peta Doa" : "Prayer Map"}
           </Link>
         </div>
+
+        {/* Joshua Project attribution — required by their terms of use */}
+        <p className="text-[10px] text-[var(--color-muted)] text-center mb-1">
+          {lang === "id" ? "Data suku dari" : "People group data from"}{" "}
+          <a
+            href="https://www.joshuaproject.net"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Joshua Project
+          </a>
+        </p>
+        <p className="text-[10px] text-[var(--color-muted)] text-center mb-4">
+          {lang === "id"
+            ? "Doa Sejati · Sebuah proyek dari JATI — Yayasan Jala Transformasi Indonesia"
+            : "Doa Sejati · A project of JATI — Yayasan Jala Transformasi Indonesia"}
+        </p>
       </div>
 
       {showShare && (
