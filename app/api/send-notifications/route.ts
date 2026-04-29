@@ -4,21 +4,11 @@ import { createServiceClient } from "@/lib/supabase";
 
 // Called by Vercel Cron — sends pushes to users whose notif_time matches now
 export async function GET(request: Request) {
-  try {
-    webpush.setVapidDetails(
-      process.env.VAPID_SUBJECT!,
-      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-      process.env.VAPID_PRIVATE_KEY!
-    );
-  } catch (err) {
-    return NextResponse.json({
-      error: "VAPID setup failed",
-      detail: String(err),
-      subject: process.env.VAPID_SUBJECT ? "set" : "missing",
-      pubkey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ? `${process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY.slice(0, 10)}...` : "missing",
-      privkey: process.env.VAPID_PRIVATE_KEY ? "set" : "missing",
-    }, { status: 500 });
-  }
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  );
   // Verify cron secret to prevent public triggers
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
