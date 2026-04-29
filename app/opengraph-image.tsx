@@ -6,10 +6,10 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function Image() {
-  const logoData = await fetch(
-    new URL("../public/icons/logo-ds-white.png", import.meta.url)
+  const imgData = await fetch(
+    new URL("../public/og-image.png", import.meta.url)
   ).then((res) => res.arrayBuffer());
-  const logoSrc = `data:image/png;base64,${Buffer.from(logoData).toString("base64")}`;
+  const imgSrc = `data:image/png;base64,${Buffer.from(imgData).toString("base64")}`;
 
   return new ImageResponse(
     (
@@ -18,16 +18,15 @@ export default async function Image() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0D1E3D",
+          background: "#3346A8",
         }}
       >
         <img
-          src={logoSrc}
-          width={480}
-          height={180}
+          src={imgSrc}
+          width={630}
+          height={630}
           style={{ objectFit: "contain" }}
         />
       </div>
