@@ -129,7 +129,7 @@ export default function ProfilePage() {
               </div>
               {user?.user_number && (
                 <div className="text-white/50 text-xs font-mono mt-0.5">
-                  #{user.user_number.toLocaleString()}
+                  user #{user.user_number.toLocaleString("id-ID")}
                 </div>
               )}
               {memberSince && (

@@ -430,7 +430,7 @@ function RecentSignupsTable({
                     className="py-2 pr-3 font-mono"
                     style={{ color: "var(--color-muted)", fontSize: 10, whiteSpace: "nowrap" }}
                   >
-                    {user.user_number ?? "—"}
+                    {user.user_number != null ? user.user_number.toLocaleString("id-ID") : "—"}
                   </td>
                   <td
                     className="py-2 pr-3 font-medium truncate max-w-[120px]"
