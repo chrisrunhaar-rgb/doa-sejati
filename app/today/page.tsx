@@ -22,6 +22,7 @@ const GRADIENT =
 export default function TodayPage() {
   const { lang } = useLang();
   const [showShare, setShowShare] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [content, setContent] = useState<DSPrayerContent | null>(null);
   const [prayerCount, setPrayerCount] = useState(0);
   const [thirtyDayCount, setThirtyDayCount] = useState(0);
@@ -83,6 +84,7 @@ export default function TodayPage() {
     }
     setPrayerCount((n) => n + 1);
     setHasPrayed(true);
+    setShowCelebration(true);
   };
 
   const pg = content?.people_group;
@@ -131,7 +133,8 @@ export default function TodayPage() {
               {tr(t.prayer.todayPrayer, lang)}
             </div>
             <div className="text-[11px] text-white/70 font-medium mt-0.5">
-              {new Date(Date.now() + 7 * 3600000).toLocaleDateString(lang === "id" ? "id-ID" : "en-GB", {
+              {new Date().toLocaleDateString(lang === "id" ? "id-ID" : "en-GB", {
+                timeZone: "Asia/Jakarta",
                 weekday: "long",
                 day: "numeric",
                 month: "long",
@@ -298,6 +301,54 @@ export default function TodayPage() {
           groupName={groupName}
           onClose={() => setShowShare(false)}
         />
+      )}
+
+      {showCelebration && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center p-4 pb-8"
+          style={{ background: "rgba(10,16,46,0.80)" }}
+          onClick={() => setShowCelebration(false)}
+        >
+          <div
+            className="bg-white rounded-3xl p-8 w-full max-w-sm text-center shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-5xl mb-5">🗺️</div>
+            <h2
+              className="font-display text-2xl font-bold leading-tight mb-3"
+              style={{ color: "var(--color-navy)" }}
+            >
+              {lang === "id"
+                ? "DOAMU MENGGERAKKAN SEGALANYA!"
+                : "YOUR PRAYER MAKES THINGS MOVE!"}
+            </h2>
+            <p className="text-sm mb-6" style={{ color: "var(--color-muted)" }}>
+              {lang === "id"
+                ? "Lihat dari mana saja doa datang hari ini."
+                : "See where prayers are coming from today."}
+            </p>
+            <Link
+              href="/map"
+              className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-white text-sm mb-3"
+              style={{ background: "var(--color-navy)" }}
+              onClick={() => setShowCelebration(false)}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                <line x1="9" y1="3" x2="9" y2="18" />
+                <line x1="15" y1="6" x2="15" y2="21" />
+              </svg>
+              {lang === "id" ? "Peta Doa" : "Prayer Map"}
+            </Link>
+            <button
+              onClick={() => setShowCelebration(false)}
+              className="text-sm font-medium"
+              style={{ color: "var(--color-muted)" }}
+            >
+              {lang === "id" ? "Tutup" : "Close"}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
