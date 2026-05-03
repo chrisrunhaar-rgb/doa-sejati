@@ -3,6 +3,8 @@ import { Vollkorn, Manrope } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/components/LanguageContext";
 import { InstallPromptProvider } from "@/components/InstallPromptProvider";
+import InAppBrowserBanner from "@/components/InAppBrowserBanner";
+import { Analytics } from "@vercel/analytics/react";
 
 const vollkorn = Vollkorn({
   variable: "--font-vollkorn",
@@ -60,7 +62,10 @@ export default function RootLayout({
       <body className="min-h-full bg-[var(--color-navy-deep)] antialiased">
         <div className="max-w-md mx-auto min-h-screen bg-[var(--color-cream)]">
           <InstallPromptProvider>
-            <LanguageProvider>{children}</LanguageProvider>
+            <LanguageProvider>
+              <InAppBrowserBanner />
+              {children}
+            </LanguageProvider>
           </InstallPromptProvider>
         </div>
         <script
@@ -68,6 +73,7 @@ export default function RootLayout({
             __html: `if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); }); }`,
           }}
         />
+        <Analytics />
       </body>
     </html>
   );
