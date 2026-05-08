@@ -20,8 +20,8 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
 
   const shareWhatsApp = () => {
     const text = lang === "id"
-      ? `Hari ini saya berdoa. Bergabunglah dalam gerakan! 👉 doasejati.org`
-      : `I prayed today. Join the movement! 👉 doasejati.org`;
+      ? `Saya bergabung dalam gerakan doa harian untuk suku-suku terabaikan di Indonesia. Mari bergabung bersama kami dan jadilah bagian dari gerakan transformasi ini! 🙏\n\nwww.doasejati.org`
+      : `I joined this daily prayer movement for the unreached peoples of Indonesia. Join us and become part of this transformation movement! 🙏\n\nwww.doasejati.org`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
