@@ -15,13 +15,13 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
   const [copied, setCopied] = useState(false);
 
   const message = t.share.message[lang](groupName);
-  const url = "https://doasejati.net";
+  const url = "https://doasejati.org";
   const fullMessage = message;
 
   const shareWhatsApp = async () => {
     const text = lang === "id"
-      ? `Hari ini saya berdoa. Bergabunglah dalam gerakan! 👉 doasejati.net`
-      : `I prayed today. Join the movement! 👉 doasejati.net`;
+      ? `Hari ini saya berdoa. Bergabunglah dalam gerakan! 👉 doasejati.org`
+      : `I prayed today. Join the movement! 👉 doasejati.org`;
     try {
       const res = await fetch("/og-image.png");
       const blob = await res.blob();
@@ -87,7 +87,7 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
             <svg width="28" height="28" viewBox="0 0 32 32" fill="currentColor">
               <path d="M16 3C9 3 3 9 3 16c0 2.4.65 4.7 1.8 6.7L3 29l6.5-1.7A13 13 0 0016 29c7 0 13-5.8 13-13S23 3 16 3zm7.3 18.3c-.3.8-1.6 1.5-2.2 1.6-.6.1-1.3.1-2.2-.2-.5-.2-1.2-.4-2-.8-3.6-1.5-5.9-5.2-6.1-5.4-.2-.3-1.6-2.1-1.6-4s1-3 1.4-3.5c.4-.4.8-.5 1.1-.5h.8c.3 0 .6.1.9.7l1.2 2.9c.1.3 0 .6-.1.9l-.5.8c-.1.2-.2.5 0 .7.9 1.7 2 2.8 3.7 3.7.3.1.6.1.8-.1l.8-1c.2-.3.5-.3.8-.2l2.8 1.3c.3.1.5.3.5.6 0 0 .1.8-.1 1.5z" />
             </svg>
-            {lang === "id" ? "Status WA" : "WA Status"}
+            WhatsApp
           </button>
 
           {/* Native share (Other) — only on devices that support it */}
