@@ -17,6 +17,8 @@ export async function GET(req: Request) {
   const todayWibStartUTC = new Date(todayWib + "T00:00:00+07:00").toISOString();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
+  const now = new Date().toISOString();
+
   const [
     totalUsersRes, todayNewUsersRes, pushTokenRes,
     totalPrayersRes, todayPrayersRes, thirtyDayPrayersRes,
@@ -25,9 +27,9 @@ export async function GET(req: Request) {
     supabase.from("ds_users").select("*", { count: "exact", head: true }),
     supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("created_at", todayWibStartUTC),
     supabase.from("ds_users").select("*", { count: "exact", head: true }).not("push_token", "is", null),
-    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }),
-    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).gte("prayed_at", todayWibStartUTC),
-    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).gte("prayed_at", thirtyDaysAgo),
+    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).lte("prayed_at", now),
+    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).gte("prayed_at", todayWibStartUTC).lte("prayed_at", now),
+    supabase.from("ds_prayer_logs").select("*", { count: "exact", head: true }).gte("prayed_at", thirtyDaysAgo).lte("prayed_at", now),
     supabase.from("ds_users").select("streak_count").gt("streak_count", 0),
     supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("streak_count", 7),
     supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("streak_count", 30),
