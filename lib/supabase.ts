@@ -180,10 +180,12 @@ export async function saveUserProfile(
 export async function getThirtyDayCount(): Promise<number> {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const now = new Date().toISOString();
   const { count } = await supabase
     .from("ds_prayer_logs")
     .select("id", { count: "exact", head: true })
-    .gte("prayed_at", thirtyDaysAgo.toISOString());
+    .gte("prayed_at", thirtyDaysAgo.toISOString())
+    .lte("prayed_at", now);
   return count ?? 0;
 }
 
@@ -191,12 +193,12 @@ export async function getThirtyDayCount(): Promise<number> {
 export async function getTodayTotalCount(): Promise<number> {
   const wibDate = new Date(Date.now() + 7 * 3600000).toISOString().split("T")[0];
   const start = new Date(wibDate + "T00:00:00+07:00").toISOString();
-  const end   = new Date(wibDate + "T24:00:00+07:00").toISOString();
+  const now = new Date().toISOString();
   const { count } = await supabase
     .from("ds_prayer_logs")
     .select("id", { count: "exact", head: true })
     .gte("prayed_at", start)
-    .lt("prayed_at", end);
+    .lte("prayed_at", now);
   return count ?? 0;
 }
 
