@@ -18,10 +18,19 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
   const url = "https://doasejati.org";
   const fullMessage = message;
 
-  const shareWhatsApp = () => {
+  const shareWhatsApp = async () => {
     const text = lang === "id"
       ? `Saya bergabung dalam gerakan doa harian untuk suku-suku terabaikan di Indonesia. Mari bergabung bersama kami dan jadilah bagian dari gerakan transformasi ini! 🙏\n\nwww.doasejati.org`
       : `I joined this daily prayer movement for the unreached peoples of Indonesia. Join us and become part of this transformation movement! 🙏\n\nwww.doasejati.org`;
+    try {
+      const res = await fetch("/og-image.png");
+      const blob = await res.blob();
+      const file = new File([blob], "doa-sejati.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text });
+        return;
+      }
+    } catch {}
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
