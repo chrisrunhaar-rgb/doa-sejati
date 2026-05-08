@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { AnalogTimePicker } from "@/components/AnalogTimePicker";
 import Link from "next/link";
 import { useLang } from "@/components/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -211,16 +212,23 @@ export default function ProfilePage() {
           <div className="border-t border-[var(--color-border)] mx-4" />
 
           {/* Reminder time */}
-          <div className="px-4 py-4">
-            <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider block mb-2">
+          <div className="px-4 py-5">
+            <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider block mb-3">
               {tr(t.profile.notifTime, lang)}
             </label>
-            <input
-              type="time"
-              value={notifTime}
-              onChange={(e) => setNotifTime(e.target.value)}
-              className="w-full bg-[var(--color-surface)] rounded-xl px-3 py-2.5 text-[var(--color-ink)] font-semibold focus:outline-none [color-scheme:light]"
-            />
+            <div className="rounded-2xl py-5 flex justify-center" style={{ background: "var(--color-navy-deep)" }}>
+              <AnalogTimePicker
+                value={notifTime}
+                onChange={setNotifTime}
+                lang={lang}
+              />
+            </div>
+            <button
+              onClick={handleSave}
+              className="w-full mt-3 py-3 rounded-2xl font-bold text-white bg-[var(--color-navy)] transition-all"
+            >
+              {saved ? "✓ " + tr(t.common.save, lang) : tr(t.common.save, lang)}
+            </button>
           </div>
 
           <div className="border-t border-[var(--color-border)] mx-4" />
@@ -257,13 +265,6 @@ export default function ProfilePage() {
             <LanguageToggle />
           </div>
         </div>
-
-        <button
-          onClick={handleSave}
-          className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-navy)] mb-4 transition-all"
-        >
-          {saved ? "✓ " + tr(t.common.save, lang) : tr(t.common.save, lang)}
-        </button>
 
         {/* Legal links */}
         <div className="bg-white rounded-2xl overflow-hidden mb-4">
