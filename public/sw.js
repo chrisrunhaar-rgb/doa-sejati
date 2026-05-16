@@ -67,7 +67,7 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: "/icons/logo.png",
-      badge: "/icons/logo.png",
+      badge: "/icons/logo-badge.png",
       tag: "daily-prayer",
       renotify: true,
       requireInteraction: false,
