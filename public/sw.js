@@ -102,18 +102,14 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
-// Push subscription change: update stored subscription
+// Push subscription change: notify the app so the user can re-enable notifications
+// Re-subscribing here is not possible without the VAPID key — the profile page handles sync on load
 self.addEventListener("pushsubscriptionchange", (event) => {
   event.waitUntil(
-    self.registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: self.VAPID_PUBLIC_KEY,
-    }).then((subscription) => {
-      return fetch("/api/push/resubscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subscription }),
-      });
+    self.clients.matchAll({ type: "window" }).then((clients) => {
+      for (const client of clients) {
+        client.postMessage({ type: "push-subscription-changed" });
+      }
     })
   );
 });

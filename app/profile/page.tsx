@@ -59,8 +59,9 @@ export default function ProfilePage() {
             const sub = await reg.pushManager.getSubscription();
             if (sub) {
               setPushStatus("granted");
-              // Silently fix missing token in DB (e.g. signed up when VAPID was broken)
-              if (!profile?.push_token && userId) {
+              // Sync browser subscription to DB if missing or endpoint changed (stale token)
+              const dbEndpoint = (profile?.push_token as { endpoint?: string } | null)?.endpoint;
+              if (userId && (!profile?.push_token || dbEndpoint !== sub.endpoint)) {
                 await updateUserProfile(userId, { push_token: sub.toJSON() as object });
               }
             } else if (Notification.permission === "denied") {
