@@ -30,7 +30,7 @@ a. Data yang Anda berikan secara sukarela
 - Zona waktu (terdeteksi otomatis dari browser Anda)
 
 b. Data yang dibuat oleh sistem
-- Token notifikasi push: Sebuah kode unik yang memungkinkan kami mengirim notifikasi ke perangkat Anda. Ini bukan data pribadi — tidak terhubung ke identitas Anda kecuali Anda mendaftarkan email.
+- Token notifikasi push: Sebuah kode unik yang memungkinkan kami mengirim notifikasi ke perangkat Anda. Token ini diperlakukan sebagai data pribadi dan dilindungi sesuai dengan kebijakan ini.
 - Catatan doa: Grup suku yang Anda doakan dan waktu doa. Digunakan untuk menghitung streak doa dan rekap pribadi Anda. Tidak dibagikan secara publik.
 - Streak doa: Jumlah hari berturut-turut Anda berdoa.
 
@@ -92,7 +92,7 @@ e. Portabilitas data — mendapatkan salinan data Anda dalam format terstruktur
 f. Mengajukan pengaduan kepada Badan Perlindungan Data Pribadi (BPDP) Indonesia
 
 Untuk menggunakan hak-hak ini, hubungi kami di: info@jala-transformasi.net
-Kami akan merespons dalam 14 hari kerja.
+Kami akan merespons dalam 14 hari kerja. Jika kami tidak menyelesaikan permintaan Anda dalam 30 hari, Anda dapat mengajukan pengaduan langsung kepada Badan Perlindungan Data Pribadi (BPDP) Indonesia.
 
 ---
 
@@ -104,6 +104,8 @@ Kami melindungi data Anda dengan:
 - Tidak ada data pribadi yang dicatat di log server
 - Akses admin terbatas dan terdokumentasi
 - Penghapusan otomatis token yang tidak aktif
+
+Jika terjadi kebocoran data yang berpotensi merugikan Anda, kami akan memberitahu pengguna yang terdampak dan Badan Perlindungan Data Pribadi (BPDP) Indonesia dalam 14 hari kalender sesuai UU PDP Pasal 46.
 
 ---
 
@@ -153,7 +155,7 @@ a. Data you provide voluntarily
 - Timezone (automatically detected from your browser)
 
 b. System-generated data
-- Push notification token: A unique code that allows us to send notifications to your device. This is not personal data — it is not linked to your identity unless you register an email.
+- Push notification token: A unique code that allows us to send notifications to your device. This token is treated as personal data and protected in accordance with this policy.
 - Prayer logs: The people groups you prayed for and the time of each prayer. Used to calculate your streak and personal recap. Not shared publicly.
 - Prayer streak: Number of consecutive days you have prayed.
 
@@ -215,7 +217,7 @@ e. Data portability — receive a copy of your data in a structured format
 f. Lodge a complaint with Indonesia's Personal Data Protection Agency (BPDP)
 
 To exercise these rights, contact us at: info@jala-transformasi.net
-We will respond within 14 business days.
+We will respond within 14 business days. If we do not resolve your request within 30 days, you may file a complaint directly with Indonesia's Personal Data Protection Agency (BPDP).
 
 ---
 
@@ -227,6 +229,8 @@ We protect your data through:
 - No personal data logged in server logs
 - Limited and documented admin access
 - Automatic deletion of inactive tokens
+
+In the event of a data breach that may harm you, we will notify affected users and Indonesia's Personal Data Protection Agency (BPDP) within 14 calendar days in accordance with UU PDP Article 46.
 
 ---
 
