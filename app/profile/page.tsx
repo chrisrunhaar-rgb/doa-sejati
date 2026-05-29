@@ -326,9 +326,18 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <div className="text-center mt-6 text-[var(--color-muted)] text-xs">
-          <p>Doa Sejati · {lang === "id" ? "Proyek dari" : "A project of"}</p>
-          <p className="font-semibold">JATI — Yayasan Jala Transformasi Indonesia</p>
+        <div className="text-center mt-6 text-[var(--color-muted)] text-[10px]">
+          <p>
+            {lang === "id" ? "Doa Sejati · Sebuah proyek dari " : "Doa Sejati · A project of "}
+            <a
+              href="https://jala-transformasi.net"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-[var(--color-ink)] transition-colors"
+            >
+              JATI
+            </a>
+          </p>
         </div>
       </div>
     </div>

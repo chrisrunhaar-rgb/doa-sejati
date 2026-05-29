@@ -290,9 +290,15 @@ export default function TodayPage() {
           </a>
         </p>
         <p className="text-[10px] text-[var(--color-muted)] text-center mb-4">
-          {lang === "id"
-            ? "Doa Sejati · Sebuah proyek dari JATI — Yayasan Jala Transformasi Indonesia"
-            : "Doa Sejati · A project of JATI — Yayasan Jala Transformasi Indonesia"}
+          {lang === "id" ? "Doa Sejati · Sebuah proyek dari " : "Doa Sejati · A project of "}
+          <a
+            href="https://jala-transformasi.net"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-[var(--color-ink)] transition-colors"
+          >
+            JATI
+          </a>
         </p>
       </div>
 
