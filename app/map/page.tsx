@@ -10,6 +10,7 @@ interface ProvinceRow {
   province: string;
   warrior_count: number;
   prayers_90d: number;
+  prayers_today?: number;
 }
 
 // 6 main regions with all 38 provinces
@@ -113,6 +114,7 @@ export default function MapPage() {
       const rows: ProvinceRow[] = (lbRes.leaderboard ?? []).map((r: ProvinceRow) => ({
         ...r,
         province: normalise(r.province),
+        prayers_today: r.prayers_today ?? 0,
       }));
       setLeaderboard(rows);
       setTodayCount(today);
@@ -130,7 +132,7 @@ export default function MapPage() {
       (sum, p) => sum + (byProvince[p]?.warrior_count ?? 0), 0
     );
     const prayers = region.provinces.reduce(
-      (sum, p) => sum + (byProvince[p]?.prayers_90d ?? 0), 0
+      (sum, p) => sum + (byProvince[p]?.prayers_today ?? 0), 0
     );
     return { ...region, warriors, prayers };
   }).sort((a, b) => b.warriors - a.warriors);
@@ -211,7 +213,7 @@ export default function MapPage() {
             {lang === "id" ? "6 Wilayah Utama" : "6 Main Regions"}
           </h2>
           <div className="flex items-center gap-3 text-[10px]">
-            <span className="text-[var(--color-terra)] font-semibold">{lang === "id" ? "● doa (90 hr)" : "● prayers (90d)"}</span>
+            <span className="text-[var(--color-terra)] font-semibold">{lang === "id" ? "● hari ini" : "● today"}</span>
             <span className="text-[var(--color-navy)] font-semibold">{lang === "id" ? "● pejuang" : "● warriors"}</span>
           </div>
         </div>
@@ -275,7 +277,7 @@ export default function MapPage() {
                   {expandedRegion === region.id && (
                     <div className="mt-1 ml-4 space-y-1">
                       {region.provinces
-                        .map((p) => ({ province: p, warrior_count: byProvince[p]?.warrior_count ?? 0, prayers_90d: byProvince[p]?.prayers_90d ?? 0 }))
+                        .map((p) => ({ province: p, warrior_count: byProvince[p]?.warrior_count ?? 0, prayers_today: byProvince[p]?.prayers_today ?? 0 }))
                         .sort((a, b) => b.warrior_count - a.warrior_count)
                         .map((prov) => (
                           <div
@@ -286,9 +288,9 @@ export default function MapPage() {
                               {prov.province}
                             </span>
                             <div className="flex items-center gap-3 text-xs text-[var(--color-muted)]">
-                              {prov.prayers_90d > 0 && (
+                              {(prov.prayers_today ?? 0) > 0 && (
                                 <span className="text-[var(--color-terra)] font-semibold">
-                                  {formatNum(prov.prayers_90d)} {lang === "id" ? "doa" : "prayers"}
+                                  {formatNum(prov.prayers_today ?? 0)} {lang === "id" ? "hari ini" : "today"}
                                 </span>
                               )}
                               <span className="font-semibold text-[var(--color-navy)]">
@@ -303,15 +305,16 @@ export default function MapPage() {
               ))}
         </div>
 
-        <p className="text-center text-[var(--color-muted)] text-xs mt-6">
-          {lang === "id"
-            ? "Lokasi berdasarkan IP · 90 hari terakhir"
-            : "Location via IP address · Last 90 days"}
-        </p>
-        <p className="text-center text-[var(--color-muted)] text-[10px] mt-2">
-          {lang === "id"
-            ? "Doa Sejati · Sebuah proyek dari JATI — Yayasan Jala Transformasi Indonesia"
-            : "Doa Sejati · A project of JATI — Yayasan Jala Transformasi Indonesia"}
+        <p className="text-center text-[var(--color-muted)] text-[10px] mt-6">
+          {lang === "id" ? "Doa Sejati · Sebuah proyek dari " : "Doa Sejati · A project of "}
+          <a
+            href="https://jala-transformasi.net"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-[var(--color-ink)] transition-colors"
+          >
+            JATI
+          </a>
         </p>
       </div>
     </div>
