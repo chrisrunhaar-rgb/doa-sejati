@@ -115,9 +115,15 @@ export default function LandingPage() {
           </div>
 
           <p className="text-white/30 text-[10px] mt-6">
-            {lang === "id"
-              ? "Doa Sejati · Sebuah proyek dari JATI — Yayasan Jala Transformasi Indonesia"
-              : "Doa Sejati · A project of JATI — Yayasan Jala Transformasi Indonesia"}
+            {lang === "id" ? "Doa Sejati · Sebuah proyek dari " : "Doa Sejati · A project of "}
+            <a
+              href="https://jala-transformasi.net"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/40 underline underline-offset-2 hover:text-white/60 transition-colors"
+            >
+              JATI
+            </a>
           </p>
         </div>
       </section>
