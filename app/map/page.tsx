@@ -305,17 +305,6 @@ export default function MapPage() {
               ))}
         </div>
 
-        <p className="text-center text-[var(--color-muted)] text-[10px] mt-6">
-          {lang === "id" ? "Doa Sejati · Sebuah proyek dari " : "Doa Sejati · A project of "}
-          <a
-            href="https://jala-transformasi.net"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-[var(--color-ink)] transition-colors"
-          >
-            JATI
-          </a>
-        </p>
       </div>
     </div>
   );
