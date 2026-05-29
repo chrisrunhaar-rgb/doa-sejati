@@ -9,18 +9,21 @@ import { t, tr } from "@/lib/i18n";
 
 export default function LandingPage() {
   const { lang } = useLang();
-  const [todayCount, setTodayCount] = useState(1247);
-  const thirtyDayCount = 38640;
+  const [todayCount, setTodayCount] = useState(0);
+  const [thirtyDayCount, setThirtyDayCount] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTodayCount((n) => n + Math.floor(Math.random() * 3));
-    }, 8000);
-    return () => clearInterval(interval);
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((d) => {
+        setTodayCount(d.todayPrayers ?? 0);
+        setThirtyDayCount(d.thirtyDayPrayers ?? 0);
+      })
+      .catch(() => {});
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[var(--color-navy-deep)]">
       <section className="relative bg-[var(--color-navy-deep)] min-h-[100svh] flex flex-col overflow-hidden">
         {/* Background */}
         <div
@@ -98,16 +101,16 @@ export default function LandingPage() {
           {/* CTAs */}
           <div className="flex flex-col gap-3 max-w-xs mx-auto">
             <Link
-              href="/today"
+              href="/signup"
               className="block w-full py-4 rounded-2xl font-bold text-white text-lg tracking-wide bg-[var(--color-terra)] active:bg-[var(--color-terra-dark)] transition-transform active:scale-[0.97] shadow-lg shadow-black/30"
             >
-              {tr(t.landing.joinCTA, lang)}
+              {lang === "id" ? "Bergabung dengan gerakan →" : "Join the movement →"}
             </Link>
             <Link
-              href="/signup"
+              href="/today"
               className="block w-full py-3 rounded-2xl font-semibold text-white/80 text-sm border border-white/20 active:bg-white/10 transition-colors"
             >
-              {lang === "id" ? "Bergabung dengan gerakan →" : "Join the movement →"}
+              {tr(t.landing.seeToday, lang)}
             </Link>
           </div>
 
