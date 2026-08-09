@@ -77,9 +77,9 @@ export const t = {
     copied: { id: "Tersalin!", en: "Copied!" },
     message: {
       id: (group: string) =>
-        `🙏 Hari ini saya berdoa untuk suku ${group}.\n\nBergabunglah dalam gerakan transformasi melalui doa — apakah kamu ikut?\n\n👉 doasejati.org`,
+        `Hari ini saya berdoa untuk suku ${group} di Indonesia. Yuk ikut bergabung dalam gerakan Doa Sejati!  https://doasejati.org/`,
       en: (group: string) =>
-        `🙏 Today I prayed for the ${group} people.\n\nJoin a movement of transformation through prayer — are you in?\n\n👉 doasejati.org`,
+        `Today I prayed for the ${group} people in Indonesia. Come join the Doa Sejati prayer movement!  https://doasejati.org/`,
     },
     inviteButton: { id: "Ajak Teman Berdoa", en: "Invite Others to Pray" },
     inviteMessage: {

@@ -19,9 +19,7 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
   const fullMessage = message;
 
   const shareWhatsApp = async () => {
-    const text = lang === "id"
-      ? `Saya bergabung dalam gerakan doa harian untuk suku-suku terabaikan di Indonesia. Mari bergabung bersama kami dan jadilah bagian dari gerakan transformasi ini! 🙏\n\nwww.doasejati.org`
-      : `I joined this daily prayer movement for the unreached peoples of Indonesia. Join us and become part of this transformation movement! 🙏\n\nwww.doasejati.org`;
+    const text = message;
     try {
       const res = await fetch("/og-image.png");
       const blob = await res.blob();
@@ -42,7 +40,9 @@ export default function ShareSheet({ groupName, onClose }: ShareSheetProps) {
 
   const shareNative = () => {
     if (navigator.share) {
-      navigator.share({ title: "Doa Sejati", text: message, url });
+      // url omitted deliberately — message already includes the link;
+      // passing both causes some share targets (e.g. WhatsApp) to append it twice
+      navigator.share({ title: "Doa Sejati", text: message });
     }
   };
 
