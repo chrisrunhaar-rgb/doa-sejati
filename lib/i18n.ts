@@ -83,8 +83,8 @@ export const t = {
     },
     inviteButton: { id: "Ajak Teman Berdoa", en: "Invite Others to Pray" },
     inviteMessage: {
-      id: "🙏 Aku sedang bergabung dalam gerakan Doa Sejati — doa harian untuk suku-suku terabaikan di Indonesia. Yuk ikut ambil bagian!\n\n👉 doasejati.org",
-      en: "🙏 I'm part of the Doa Sejati movement — daily prayer for unreached peoples across Indonesia. Come join us!\n\n👉 doasejati.org",
+      id: "Aku bagian dari gerakan Doa Sejati — doa harian untuk suku-suku terabaikan di Indonesia. Yuk ikut bergabung!  https://doasejati.org/",
+      en: "I'm part of the Doa Sejati movement — daily prayer for unreached peoples across Indonesia. Come join us!  https://doasejati.org/",
     },
   },
 

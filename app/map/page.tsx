@@ -145,7 +145,9 @@ export default function MapPage() {
     const text = tr(t.share.inviteMessage, lang);
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({ title: "Doa Sejati", text, url: "https://doasejati.org" });
+        // url omitted deliberately — text already includes the link;
+        // passing both causes some share targets (e.g. WhatsApp) to append it twice
+        await navigator.share({ title: "Doa Sejati", text });
         return;
       } catch {
         return; // user cancelled or share failed — don't fall through to a second prompt
