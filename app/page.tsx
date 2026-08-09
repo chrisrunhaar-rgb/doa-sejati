@@ -32,7 +32,6 @@ export default function LandingPage() {
             backgroundImage: "url('/prayer-map.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center 8%",
-            opacity: 0.70,
           }}
         />
         <div
