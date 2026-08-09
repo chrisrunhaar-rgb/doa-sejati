@@ -112,7 +112,7 @@ export default function TodayPage() {
           style={{
             backgroundImage: "url('/prayer-map.jpg')",
             backgroundSize: "cover",
-            backgroundPosition: "center 30%",
+            backgroundPosition: "center top",
           }}
         />
         <div className="absolute inset-0 z-0" style={{ background: GRADIENT }} />
