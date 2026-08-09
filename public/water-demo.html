@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Water Ripple Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: linear-gradient(170deg, #0d1e3d 0%, #1a2f52 100%);
+    font-family: system-ui, sans-serif;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .content {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 32px;
+    color: white;
+    text-align: center;
+  }
+
+  .tag {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    font-weight: 600;
+  }
+
+  .group-name {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.05;
+  }
+
+  .prayer-text {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.7;
+    max-width: 300px;
+  }
+
+  .prayer-points {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+    max-width: 300px;
+    width: 100%;
+  }
+
+  .prayer-points li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.55;
+  }
+
+  .prayer-points .num {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  #prayBtn {
+    pointer-events: none;
+    padding: 16px 0;
+    border-radius: 14px;
+    background: #c0522a;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    width: 100%;
+    max-width: 300px;
+    animation: glow 2.8s ease-in-out infinite;
+  }
+
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 22px 8px rgba(192,82,42,0.50), 0 8px 28px rgba(192,82,42,0.35); }
+    50%       { box-shadow: 0 0 48px 20px rgba(192,82,42,0.08), 0 12px 44px rgba(192,82,42,0.04); }
+  }
+
+  /* Canvas sits ON TOP — transparent except for ripple rings */
+  #waterCanvas {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  #clickCatcher {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="content">
+  <div class="tag">Doa Hari Ini · 28 April 2026</div>
+  <div class="group-name">Suku Bugis</div>
+  <p class="prayer-text">
+    Suku Bugis tersebar di seluruh Nusantara sebagai pelaut dan pedagang ulung.
+    Mayoritas Muslim dengan tradisi yang kuat. Hanya sebagian kecil yang mengenal Yesus.
+  </p>
+  <ul class="prayer-points">
+    <li><span class="num">1</span><span>Doakan agar hati orang Bugis terbuka untuk mendengar Injil melalui hubungan dan kepercayaan.</span></li>
+    <li><span class="num">2</span><span>Doakan gereja lokal agar berani menjangkau saudara Bugis di sekitar mereka.</span></li>
+    <li><span class="num">3</span><span>Doakan para pelayan yang bekerja secara lintas budaya di antara suku Bugis.</span></li>
+  </ul>
+  <button id="prayBtn">Saya Sudah Berdoa</button>
+</div>
+
+<canvas id="waterCanvas"></canvas>
+<div id="clickCatcher"></div>
+
+<script>
+const canvas  = document.getElementById('waterCanvas');
+const ctx     = canvas.getContext('2d');
+const catcher = document.getElementById('clickCatcher');
+
+let W, H;
+let ripples   = [];
+let animating = false;
+
+// ─── Resize ───────────────────────────────────────────────────────────────────
+
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  W = canvas.width  = Math.floor(window.innerWidth  * dpr);
+  H = canvas.height = Math.floor(window.innerHeight * dpr);
+  canvas.style.width  = window.innerWidth  + 'px';
+  canvas.style.height = window.innerHeight + 'px';
+  ctx.scale(dpr, dpr);
+}
+
+// ─── Spawn ripple ─────────────────────────────────────────────────────────────
+
+function spawnRipple(pageX, pageY) {
+  const x = pageX;
+  const y = pageY;
+  // Max radius: distance to farthest corner so rings always cover full screen
+  const maxR = Math.sqrt(
+    Math.pow(Math.max(x, window.innerWidth  - x), 2) +
+    Math.pow(Math.max(y, window.innerHeight - y), 2)
+  ) + 40;
+
+  const now = performance.now();
+  ripples.push({
+    x, y, maxR,
+    // 4 rings, each 180ms apart
+    rings: [0, 300, 600, 900].map(delay => ({ t0: now + delay }))
+  });
+
+  if (!animating) {
+    animating = true;
+    requestAnimationFrame(draw);
+  }
+}
+
+// ─── Draw frame ───────────────────────────────────────────────────────────────
+
+const RING_DURATION = 2200; // ms — how long one ring takes to cross screen
+
+function draw(now) {
+  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+  let alive = false;
+
+  for (const rpl of ripples) {
+    for (const ring of rpl.rings) {
+      const elapsed = now - ring.t0;
+      if (elapsed < 0) { alive = true; continue; }  // not started yet
+
+      const t = elapsed / RING_DURATION;
+      if (t >= 1) continue;  // done
+      alive = true;
+
+      const r = rpl.maxR * t;
+
+      // Outer glow band — wide, very faint
+      const glowWidth = 28 * (1 - t * 0.6);
+      const glowOpacity = (1 - t) * 0.18;
+      ctx.beginPath();
+      ctx.arc(rpl.x, rpl.y, r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(180, 220, 255, ${glowOpacity.toFixed(3)})`;
+      ctx.lineWidth   = glowWidth;
+      ctx.stroke();
+
+      // Main ring — thin bright edge
+      const ringOpacity = Math.pow(1 - t, 1.2) * 0.55;
+      ctx.beginPath();
+      ctx.arc(rpl.x, rpl.y, r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${ringOpacity.toFixed(3)})`;
+      ctx.lineWidth   = 2.5 * (1 - t * 0.5);
+      ctx.stroke();
+    }
+  }
+
+  // Prune fully-expired ripples
+  ripples = ripples.filter(rpl =>
+    rpl.rings.some(ring => (now - ring.t0) < RING_DURATION)
+  );
+
+  if (alive || ripples.length > 0) {
+    requestAnimationFrame(draw);
+  } else {
+    animating = false;
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  }
+}
+
+// ─── Events ───────────────────────────────────────────────────────────────────
+
+function onPointer(e) {
+  const x = e.clientX ?? e.touches?.[0]?.clientX;
+  const y = e.clientY ?? e.touches?.[0]?.clientY;
+  if (x != null) spawnRipple(x, y);
+}
+
+catcher.addEventListener('click',      onPointer);
+catcher.addEventListener('touchstart', onPointer, { passive: true });
+window.addEventListener('resize', () => { resize(); });
+
+resize();
+</script>
+</body>
+</html>

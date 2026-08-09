@@ -82,7 +82,7 @@ Doa Sejati menampilkan tautan donasi yang diarahkan ke proyek pelayanan JATI di 
 
 7. PRIVASI
 
-Penggunaan data pribadi Anda diatur oleh Kebijakan Privasi kami yang merupakan bagian tidak terpisahkan dari Syarat ini. Lihat: doasejati.net/privacy
+Penggunaan data pribadi Anda diatur oleh Kebijakan Privasi kami yang merupakan bagian tidak terpisahkan dari Syarat ini. Lihat: doasejati.org/privacy
 
 ---
 
@@ -203,7 +203,7 @@ Doa Sejati displays donation links directed to JATI ministry projects among spec
 
 7. PRIVACY
 
-Your personal data is governed by our Privacy Policy, which forms part of these Terms. See: doasejati.net/privacy
+Your personal data is governed by our Privacy Policy, which forms part of these Terms. See: doasejati.org/privacy
 
 ---
 

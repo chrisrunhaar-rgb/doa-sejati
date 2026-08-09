@@ -15,6 +15,7 @@ interface Stats {
   usersWithStreakOver7: number;
   usersWithStreakOver30: number;
   pushOpens30d: number;
+  pwaInstalls: number;
 }
 
 interface VolumeEntry {
@@ -36,6 +37,11 @@ interface AdminUser {
 interface ProvinceEntry {
   province: string;
   warrior_count: number;
+}
+
+interface NotifTimeEntry {
+  notification_time: string;
+  user_count: number;
 }
 
 interface UpcomingContent {
@@ -354,6 +360,99 @@ function ProvinceTable({
               </div>
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Notification Time Table ──────────────────────────────────────────────────
+
+const SAFE_LIMIT = 50000;
+
+function NotifTimeTable({
+  data,
+  loading,
+}: {
+  data: NotifTimeEntry[];
+  loading: boolean;
+}) {
+  const max = data.length > 0 ? Math.max(...data.map((d) => d.user_count), 1) : 1;
+
+  return (
+    <div
+      className="rounded-xl p-5 flex flex-col"
+      style={{ background: "white", boxShadow: "0 1px 4px rgba(13,30,61,0.08)" }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h2
+          className="text-sm font-semibold uppercase tracking-widest"
+          style={{ color: "var(--color-muted)" }}
+        >
+          Top 5 Waktu Notifikasi
+        </h2>
+        <span className="text-xs" style={{ color: "var(--color-muted)" }}>
+          Batas aman: {SAFE_LIMIT.toLocaleString("id-ID")} / slot
+        </span>
+      </div>
+
+      {loading ? (
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <Skeleton className="h-4 w-12 rounded" />
+              <Skeleton className="h-4 flex-1 rounded" />
+              <Skeleton className="h-4 w-10 rounded" />
+            </div>
+          ))}
+        </div>
+      ) : data.length === 0 ? (
+        <p className="text-sm" style={{ color: "var(--color-muted)" }}>
+          Belum ada data waktu notifikasi.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {data.map((row, i) => {
+            const pct = (row.user_count / SAFE_LIMIT) * 100;
+            const isWarning = pct >= 80;
+            const isDanger = pct >= 100;
+            return (
+              <div key={row.notification_time} className="flex items-center gap-3">
+                <span
+                  className="text-xs font-bold w-12 text-right flex-shrink-0 font-mono"
+                  style={{ color: i < 3 ? "var(--color-terra)" : "var(--color-muted)" }}
+                >
+                  {row.notification_time}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span
+                      className="text-xs font-bold"
+                      style={{ color: isDanger ? "oklch(55% 0.18 25)" : isWarning ? "oklch(60% 0.15 60)" : "var(--color-navy)" }}
+                    >
+                      {row.user_count.toLocaleString("id-ID")} pengguna
+                    </span>
+                    <span className="text-xs ml-2 flex-shrink-0" style={{ color: "var(--color-muted)" }}>
+                      {Math.round(pct)}% kapasitas
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full" style={{ background: "var(--color-border)" }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(pct, 100)}%`,
+                        background: isDanger
+                          ? "oklch(55% 0.18 25)"
+                          : isWarning
+                          ? "oklch(70% 0.15 60)"
+                          : "oklch(20% 0.09 258)",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -856,6 +955,7 @@ export default function AdminPage() {
   const [volume, setVolume] = useState<VolumeEntry[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [provinces, setProvinces] = useState<ProvinceEntry[]>([]);
+  const [notifTimes, setNotifTimes] = useState<NotifTimeEntry[]>([]);
   const [content, setContent] = useState<UpcomingContent[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [previewItem, setPreviewItem] = useState<UpcomingContent | null>(null);
@@ -920,9 +1020,10 @@ export default function AdminPage() {
       setLoadingVolume(false);
 
       if (usersRes.status === "fulfilled" && !usersRes.value.error) {
-        const d = usersRes.value as { recent: AdminUser[]; provinceTop10: ProvinceEntry[] };
+        const d = usersRes.value as { recent: AdminUser[]; provinceTop10: ProvinceEntry[]; notifTop5: NotifTimeEntry[] };
         setUsers(d.recent ?? []);
         setProvinces(d.provinceTop10 ?? []);
+        setNotifTimes(d.notifTop5 ?? []);
       }
       setLoadingUsers(false);
 
@@ -956,6 +1057,7 @@ export default function AdminPage() {
     setVolume([]);
     setUsers([]);
     setProvinces([]);
+    setNotifTimes([]);
     setContent([]);
     setLastUpdated(null);
   }
@@ -1124,17 +1226,27 @@ export default function AdminPage() {
               : "dari push terkirim"}
             loading={loadingStats}
           />
+          <StatCard
+            label="Install PWA"
+            value={stats?.pwaInstalls ?? 0}
+            sub={stats && stats.totalUsers > 0
+              ? `${Math.round((stats.pwaInstalls / stats.totalUsers) * 100)}% dari total`
+              : "menginstal aplikasi"}
+            loading={loadingStats}
+            accent
+          />
         </section>
 
         {/* ── Bar Chart ── */}
         <BarChart volume={volume} loading={loadingVolume} />
 
-        {/* ── Province + Recent Signups ── */}
+        {/* ── Province + Notif Times + Recent Signups ── */}
         <section
           className="grid gap-6"
-          style={{ gridTemplateColumns: "1fr 1.4fr" }}
+          style={{ gridTemplateColumns: "1fr 1fr 1.4fr" }}
         >
           <ProvinceTable data={provinces} loading={loadingUsers} />
+          <NotifTimeTable data={notifTimes} loading={loadingUsers} />
           <RecentSignupsTable data={users} loading={loadingUsers} />
         </section>
 

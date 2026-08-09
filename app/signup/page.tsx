@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react"; // useRef kept for VAPID push subscription logic
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import { useLang } from "@/components/LanguageContext";
 import { t, tr } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
 import { useInstallPrompt } from "@/components/InstallPromptProvider";
+import { AnalogTimePicker } from "@/components/AnalogTimePicker";
 import type { Lang } from "@/lib/i18n";
 
 function vapidKeyToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
@@ -152,6 +153,7 @@ export default function SignupPage() {
       }
 
       // 4. Save profile + detect province server-side (awaited — province needs server geo headers)
+      const pwaInstalledPending = localStorage.getItem("ds_pwa_installed_pending");
       await fetch("/api/create-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -163,8 +165,10 @@ export default function SignupPage() {
           timezone,
           push_token: pushToken,
           user_token: userToken,
+          pwa_installed_at: pwaInstalledPending ? new Date().toISOString() : undefined,
         }),
       });
+      if (pwaInstalledPending) localStorage.removeItem("ds_pwa_installed_pending");
 
       // 5. Persist userId and token for session
       localStorage.setItem("ds_user_id", userId);
@@ -364,7 +368,7 @@ export default function SignupPage() {
                   </div>
                   <div>
                     <div className="font-bold text-white">Doa Sejati</div>
-                    <div className="text-white/50 text-sm">doasejati.net</div>
+                    <div className="text-white/50 text-sm">doasejati.org</div>
                   </div>
                 </div>
                 {installPrompt ? (
@@ -397,55 +401,19 @@ export default function SignupPage() {
 
         {/* Step 4 — Notification time */}
         {step === 4 && (
-          <div className="animate-float-in">
-            <h2 className="font-display text-2xl font-bold text-white mb-2">
+          <div className="animate-float-in flex flex-col items-center">
+            <h2 className="font-display text-2xl font-bold text-white mb-1 text-center">
               {tr(t.signup.reminderTime, lang)}
             </h2>
-            <p className="text-white/60 text-sm mb-6">
-              {lang === "id"
-                ? "Zona waktu kamu akan terdeteksi secara otomatis."
-                : "Your timezone will be detected automatically."}
-            </p>
-
-            {/* Quick picks */}
-            <div className="flex gap-2 mb-4">
-              {[
-                { value: "07:00", icon: "🌅", label: lang === "id" ? "Pagi" : "Morning" },
-                { value: "12:00", icon: "☀️", label: lang === "id" ? "Siang" : "Noon" },
-                { value: "20:00", icon: "🌙", label: lang === "id" ? "Malam" : "Evening" },
-              ].map(({ value, icon, label }) => (
-                <button
-                  key={value}
-                  onClick={() => setForm((f) => ({ ...f, notifTime: value }))}
-                  className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl border transition-all ${
-                    form.notifTime === value
-                      ? "bg-[var(--color-terra)]/20 border-[var(--color-terra)] text-white"
-                      : "bg-white/8 border-white/10 text-white/70"
-                  }`}
-                >
-                  <span className="text-xl">{icon}</span>
-                  <span className="text-xs font-semibold">{label}</span>
-                  <span className="text-[10px] text-white/50">{value}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Free time picker */}
-            <div className="mb-6">
-              <label className="block text-xs text-white/50 uppercase tracking-widest mb-2 px-1">
-                {lang === "id" ? "Atau pilih waktu sendiri" : "Or pick your own time"}
-              </label>
-              <input
-                type="time"
-                value={form.notifTime}
-                onChange={(e) => setForm((f) => ({ ...f, notifTime: e.target.value }))}
-                className="w-full px-4 py-4 rounded-2xl bg-white/10 border border-white/15 text-white text-lg font-semibold focus:outline-none focus:border-white/40 [color-scheme:dark]"
-              />
-            </div>
+            <AnalogTimePicker
+              value={form.notifTime}
+              onChange={(v) => setForm((f) => ({ ...f, notifTime: v }))}
+              lang={lang}
+            />
 
             <button
               onClick={handleTimeStep}
-              className="w-full py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)]"
+              className="w-full max-w-xs mt-6 py-4 rounded-2xl font-bold text-white bg-[var(--color-terra)]"
             >
               {tr(t.signup.continueBtn, lang)}
             </button>

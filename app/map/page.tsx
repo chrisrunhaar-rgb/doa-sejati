@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLang } from "@/components/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
 import { getTodayTotalCount, getThirtyDayCount } from "@/lib/supabase";
+import { t, tr } from "@/lib/i18n";
 
 interface ProvinceRow {
   province: string;
@@ -140,6 +141,19 @@ export default function MapPage() {
   const maxRegionWarriors = regionStats[0]?.warriors ?? 1;
   const totalWarriors = regionStats.reduce((a, r) => a + r.warriors, 0);
 
+  const handleInvite = async () => {
+    const text = tr(t.share.inviteMessage, lang);
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title: "Doa Sejati", text, url: "https://doasejati.org" });
+        return;
+      } catch {
+        return; // user cancelled or share failed — don't fall through to a second prompt
+      }
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-navy-deep)]">
       {/* Header with photo background */}
@@ -202,6 +216,24 @@ export default function MapPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Invite button */}
+      <div className="px-5 pb-4">
+        <button
+          onClick={handleInvite}
+          className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 px-4 font-bold text-white text-sm shadow-lg active:scale-[0.98] transition-transform"
+          style={{ backgroundColor: "var(--color-terra)" }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+            <line x1="15.4" y1="6.5" x2="8.6" y2="10.5" />
+          </svg>
+          {tr(t.share.inviteButton, lang)}
+        </button>
       </div>
 
       {/* Main content */}

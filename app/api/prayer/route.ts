@@ -1,6 +1,23 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
 
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const userId = searchParams.get("userId");
+  const contentId = searchParams.get("contentId");
+  if (!userId || !contentId) {
+    return NextResponse.json({ error: "missing params" }, { status: 400 });
+  }
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from("ds_prayer_logs")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("content_id", contentId)
+    .single();
+  return NextResponse.json({ hasPrayed: !!data });
+}
+
 export async function POST(req: Request) {
   const { userId, contentId } = await req.json();
   if (!userId || !contentId) {
@@ -29,29 +46,33 @@ export async function POST(req: Request) {
     { onConflict: "id", ignoreDuplicates: true }
   );
 
-  // Geolocate from IP on first prayer (fallback if create-profile didn't set it)
+  // Geolocate from Vercel headers on first prayer (fallback if create-profile didn't set it)
   const { data: existingUser } = await supabase
     .from("ds_users").select("province").eq("id", userId).single();
   if (!existingUser?.province) {
-    const vercelCountry = req.headers.get("x-vercel-ip-country");
-    if (vercelCountry && vercelCountry !== "ID") {
+    const country = req.headers.get("x-vercel-ip-country");
+    if (country && country !== "ID") {
       await supabase.from("ds_users").update({ province: "Luar Negeri" }).eq("id", userId);
-    } else {
-      const forwarded = req.headers.get("x-forwarded-for");
-      const ip = forwarded ? forwarded.split(",")[0].trim() : null;
-      if (ip && ip !== "127.0.0.1" && ip !== "::1") {
-        try {
-          const geo = await fetch(`https://ipapi.co/${ip}/json/`, {
-            signal: AbortSignal.timeout(3000),
-          }).then((r) => r.json());
-          if (geo?.country_code === "ID" && geo?.region) {
-            await supabase.from("ds_users").update({ province: geo.region }).eq("id", userId);
-          } else if (geo?.country_code && geo.country_code !== "ID") {
-            await supabase.from("ds_users").update({ province: "Luar Negeri" }).eq("id", userId);
-          }
-        } catch {
-          // geolocation failed — continue without province
-        }
+    } else if (country === "ID") {
+      const region = req.headers.get("x-vercel-ip-country-region");
+      if (region) {
+        const ID_PROVINCES: Record<string, string> = {
+          AC: "Aceh", BA: "Bali", BB: "Kepulauan Bangka Belitung", BE: "Bengkulu",
+          BT: "Banten", GO: "Gorontalo", JA: "Jambi", JB: "Jawa Barat",
+          JI: "Jawa Timur", JK: "DKI Jakarta", JT: "Jawa Tengah",
+          KB: "Kalimantan Barat", KI: "Kalimantan Timur", KR: "Kepulauan Riau",
+          KS: "Kalimantan Selatan", KT: "Kalimantan Tengah", KU: "Kalimantan Utara",
+          LA: "Lampung", MA: "Maluku", MU: "Maluku Utara",
+          NB: "Nusa Tenggara Barat", NT: "Nusa Tenggara Timur",
+          PA: "Papua", PB: "Papua Barat", PD: "Papua Barat Daya",
+          PE: "Papua Pegunungan", PS: "Papua Selatan", PT: "Papua Tengah",
+          RI: "Riau", SA: "Sulawesi Utara", SB: "Sumatera Barat",
+          SG: "Sulawesi Tenggara", SN: "Sulawesi Selatan", SR: "Sulawesi Barat",
+          SS: "Sumatera Selatan", ST: "Sulawesi Tengah", SU: "Sumatera Utara",
+          YO: "DI Yogyakarta",
+        };
+        const province = ID_PROVINCES[region];
+        if (province) await supabase.from("ds_users").update({ province }).eq("id", userId);
       }
     }
   }
@@ -68,16 +89,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: logError.message }, { status: 500 });
   }
 
-  // Update streak — use WIB (UTC+7) so Indonesian users' day boundaries are respected
-  const wib = (ms: number) => new Date(ms + 7 * 3600000);
-  const today     = wib(Date.now()).toISOString().split("T")[0];
-  const yesterday = wib(Date.now() - 86400000).toISOString().split("T")[0];
+  // Update streak — use user's own timezone for correct day boundaries
+  function localDate(tz: string, base = new Date()): string {
+    try { return base.toLocaleDateString("en-CA", { timeZone: tz }); }
+    catch { return new Date(base.getTime() + 7 * 3600000).toISOString().split("T")[0]; }
+  }
 
   const { data: profile } = await supabase
     .from("ds_users")
     .select("streak_count, streak_last_date, language, notification_time, timezone")
     .eq("id", userId)
     .single();
+
+  const userTz    = profile?.timezone || "Asia/Jakarta";
+  const today     = localDate(userTz);
+  const yesterday = localDate(userTz, new Date(Date.now() - 86400000));
 
   if (profile?.streak_last_date === today) {
     return NextResponse.json({ ok: true, alreadyCounted: true, streak: profile.streak_count });

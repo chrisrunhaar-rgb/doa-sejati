@@ -96,7 +96,7 @@ export async function GET(request: Request) {
         await webpush.sendNotification(
           user.push_token as webpush.PushSubscription,
           JSON.stringify({ title, body, url: "/today" }),
-          { urgency: "high" }
+          { urgency: "high", TTL: 60 }
         );
         sent++;
       } catch (err) {

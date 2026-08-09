@@ -129,18 +129,17 @@ export async function recordPrayer(
   return { ok: true, streak: data.streak };
 }
 
-// Helper: check if user has already prayed today
+// Helper: check if user has already prayed today (uses service client via API — bypasses RLS)
 export async function hasPrayedToday(
   userId: string,
   contentId: string
 ): Promise<boolean> {
-  const { data } = await supabase
-    .from("ds_prayer_logs")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("content_id", contentId)
-    .single();
-  return !!data;
+  const res = await fetch(
+    `/api/prayer?userId=${encodeURIComponent(userId)}&contentId=${encodeURIComponent(contentId)}`
+  );
+  if (!res.ok) return false;
+  const { hasPrayed } = await res.json();
+  return !!hasPrayed;
 }
 
 // Helper: get province counts for map

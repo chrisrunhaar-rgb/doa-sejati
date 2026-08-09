@@ -21,6 +21,25 @@ export function InstallPromptProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  useEffect(() => {
+    const onInstalled = () => {
+      const userId = localStorage.getItem("ds_user_id");
+      if (userId) {
+        const userToken = localStorage.getItem("ds_user_token") || "";
+        fetch("/api/pwa-install", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-user-token": userToken },
+          body: JSON.stringify({ userId }),
+        }).catch(() => {});
+      } else {
+        // Signup not completed yet — flag it so create-profile can attach it later
+        localStorage.setItem("ds_pwa_installed_pending", "1");
+      }
+    };
+    window.addEventListener("appinstalled", onInstalled);
+    return () => window.removeEventListener("appinstalled", onInstalled);
+  }, []);
+
   return (
     <Ctx.Provider value={{ prompt, clear: () => setPrompt(null) }}>
       {children}

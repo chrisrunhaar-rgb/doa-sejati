@@ -5,6 +5,7 @@ export interface ProvinceLeaderboard {
   province: string;
   warrior_count: number;
   prayers_90d: number;
+  prayers_today: number;
 }
 
 export async function GET() {

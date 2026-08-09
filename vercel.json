@@ -2,7 +2,15 @@
   "crons": [
     {
       "path": "/api/send-notifications",
-      "schedule": "0 0 * * *"
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/seed-prayer",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cleanup",
+      "schedule": "0 3 * * 0"
     }
   ]
 }

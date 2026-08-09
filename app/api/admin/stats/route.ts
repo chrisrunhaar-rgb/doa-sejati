@@ -22,7 +22,7 @@ export async function GET(req: Request) {
   const [
     totalUsersRes, todayNewUsersRes, pushTokenRes,
     totalPrayersRes, todayPrayersRes, thirtyDayPrayersRes,
-    avgStreakRes, streak7Res, streak30Res, pushOpensRes,
+    avgStreakRes, streak7Res, streak30Res, pushOpensRes, pwaInstallsRes,
   ] = await Promise.all([
     supabase.from("ds_users").select("*", { count: "exact", head: true }),
     supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("created_at", todayWibStartUTC),
@@ -34,6 +34,7 @@ export async function GET(req: Request) {
     supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("streak_count", 7),
     supabase.from("ds_users").select("*", { count: "exact", head: true }).gte("streak_count", 30),
     supabase.from("ds_notification_opens").select("*", { count: "exact", head: true }).gte("opened_at", new Date(Date.now() - 30 * 86400000).toISOString()),
+    supabase.from("ds_users").select("*", { count: "exact", head: true }).not("pwa_installed_at", "is", null),
   ]);
 
   let avgStreak = 0;
@@ -54,5 +55,6 @@ export async function GET(req: Request) {
     usersWithStreakOver7: streak7Res.count ?? 0,
     usersWithStreakOver30: streak30Res.count ?? 0,
     pushOpens30d: pushOpensRes.count ?? 0,
+    pwaInstalls: pwaInstallsRes.count ?? 0,
   });
 }

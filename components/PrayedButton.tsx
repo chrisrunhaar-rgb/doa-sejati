@@ -101,6 +101,10 @@ export default function PrayedButton({
   };
 
   useEffect(() => {
+    if (initialPrayed) setPrayed(true);
+  }, [initialPrayed]);
+
+  useEffect(() => {
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
   }, []);
 
