@@ -74,7 +74,7 @@ Data yang bersifat publik:
 6. PENYIMPANAN DAN PENGHAPUSAN DATA
 
 - Data akun disimpan selama akun Anda aktif
-- Catatan doa individual: disimpan selama 2 tahun dari tanggal doa
+- Catatan doa individual: disimpan selama 40 hari dari tanggal doa, kemudian dihapus secara otomatis
 - Token notifikasi: dihapus jika tidak aktif selama 12 bulan
 - Data agregat provinsi: disimpan selamanya (ini bukan data pribadi)
 - Jika Anda menghapus akun: semua data pribadi Anda dihapus dalam 30 hari kerja
