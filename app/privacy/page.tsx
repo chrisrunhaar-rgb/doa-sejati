@@ -199,7 +199,7 @@ Publicly visible data:
 6. DATA RETENTION AND DELETION
 
 - Account data: retained while your account is active
-- Individual prayer logs: retained for 2 years from the date of prayer
+- Individual prayer logs: retained for 40 days from the date of prayer, then automatically deleted
 - Notification tokens: deleted after 12 months of inactivity
 - Aggregate province data: retained indefinitely (this is not personal data)
 - If you delete your account: all your personal data is deleted within 30 business days
