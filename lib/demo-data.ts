@@ -3,14 +3,14 @@ import { SupabaseClient } from "@supabase/supabase-js";
 // Demo accounts are the ~350 "DEMO###"-named ds_users rows Chris loaded
 // deliberately to keep the map/activity feed looking alive. This module keeps
 // that dataset rolling forward so it never runs dry, and keeps every demo
-// prayer log timestamped as morning activity (6:00-10:00 WIB), which is what
+// prayer log timestamped as morning activity (4:00-10:00 WIB), which is what
 // the public-facing "prayers today" / map counts actually surface.
 
 const DEMO_NAME_PATTERN = "DEMO%";
 const DAYS_TO_EXTEND = 7; // one week per cleanup cron run, matches the one week of data the cron deletes
-const MORNING_START_HOUR_WIB = 6;
-const MORNING_WINDOW_HOURS = 4; // 6:00-10:00 WIB
-const DEMO_PARTICIPATION_RATE = 0.83; // ~290 of 350 users/day, matches historical 284-308/day range
+const MORNING_START_HOUR_WIB = 4;
+const MORNING_WINDOW_HOURS = 6; // 4:00-10:00 WIB (Chris 2026-10-01: start at 4am)
+const DEMO_PARTICIPATION_RATE = 0.98; // ~343 of 350 users/day (Chris 2026-10-01: raised from 0.83)
 const INSERT_BATCH_SIZE = 100;
 
 export interface ExtendDemoResult {
@@ -22,7 +22,7 @@ export interface ExtendDemoResult {
   demoUserCount: number;
 }
 
-/** Random timestamp (ISO, UTC) falling within 6:00-10:00 WIB on the given WIB calendar date (YYYY-MM-DD). */
+/** Random timestamp (ISO, UTC) falling within 4:00-10:00 WIB on the given WIB calendar date (YYYY-MM-DD). */
 function randomMorningTimeWIB(wibDateISO: string): string {
   const midnightWibAsUTC = new Date(`${wibDateISO}T00:00:00+07:00`);
   const offsetMs =
@@ -35,7 +35,7 @@ function randomMorningTimeWIB(wibDateISO: string): string {
  * weekly cleanup cron's 40-day deletion is offset by an equal weekly injection
  * of fresh future-dated demo rows instead of letting the static dataset run dry.
  *
- * All generated rows land within 6:00-10:00 WIB per Chris's fix for the
+ * All generated rows land within 4:00-10:00 WIB per Chris's fix for the
  * "morning prayer count looks low" complaint (root cause: the old static
  * dataset's remaining rows clustered in the evening, 19:00-23:00 WIB).
  */
